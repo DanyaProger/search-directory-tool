@@ -73,7 +73,7 @@ namespace SearchDirectoryTool
                     index = i;
                     break;
                 }
-                if (GetLastDir(directories[i].fullpath).IndexOf(path) != -1)
+                if (GetLastDir(directories[i].fullpath).ToLower().IndexOf(path.ToLower()) != -1)
                 {
                     if (directories[i].count > maxCount)
                     {
