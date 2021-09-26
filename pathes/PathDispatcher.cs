@@ -94,6 +94,31 @@ namespace SearchDirectoryTool
             
         }
 
+        public bool IsFullPath(string path)
+        {
+            return Path.IsPathRooted(path) && Path.IsPathFullyQualified(path);
+        }
+
+        public string AddPath(string path, string alias)
+        {
+            string fullPath = Path.GetFullPath(path);
+            directories.Add(new DirectoryElement(fullPath, alias));
+
+            return fullPath;
+        }
+
+        public string GetDirFromFile(string path)
+        {
+            string filePath = Path.GetFullPath(path);
+            if (File.Exists(filePath))
+            {
+                return filePath.Substring(0, filePath.LastIndexOf('\\'));
+            } else
+            {
+                return null;
+            }
+        }
+
         public string GetLastDir(string path)
         {
             int lastPos = path.Length;
