@@ -10,6 +10,11 @@ namespace SearchDirectoryTool
         public int count;
         public string alias;
 
+        public DirectoryElement()
+        {
+
+        }
+
         public DirectoryElement(string fullpath, string alias)
         {
             this.fullpath = fullpath;

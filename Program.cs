@@ -6,7 +6,9 @@ namespace SearchDirectoryTool
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            SDTool sdTool = new SDTool();
+            args = new string[1] { "D:\\Programming"};
+            sdTool.pipeline(args);
         }
     }
 }

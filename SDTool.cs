@@ -11,8 +11,8 @@ namespace SearchDirectoryTool
         public void pipeline(string[] args)
         {
             arguments = ArgumentParser.splitArguments(args);
-
-            
+            Executor executor = new Executor(arguments);
+            executor.run();
         }
     }
 }

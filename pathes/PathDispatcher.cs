@@ -12,6 +12,10 @@ namespace SearchDirectoryTool
 
         public void LoadDirs()
         {
+            if (!File.Exists(DIRS_FILE))
+            {
+                File.Create(DIRS_FILE);
+            }
             using (StreamReader file = new StreamReader(DIRS_FILE))
             {
                 directories = new List<DirectoryElement>();
@@ -23,7 +27,7 @@ namespace SearchDirectoryTool
 
                     str = file.ReadLine();
                     string[] secondLine = str.Split(" ");
-                    if (secondLine.Length == 2)
+                    if (secondLine.Length == 1)
                     {
                         int counter;
                         try
