@@ -43,7 +43,7 @@ namespace SearchDirectoryTool
                         ChangeDirectory("", arguments.optionalArgument.Value);
                     } else if (arguments.optionalArgument.Key == "path")
                     {
-                        AddToPath(arguments.args[0]);
+                        //AddToPath(arguments.args[0]);
                     } else
                     {
                         Console.WriteLine("Wrong name of parameter: " + arguments.optionalArgument.Key);

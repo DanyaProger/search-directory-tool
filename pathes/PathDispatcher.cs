@@ -7,27 +7,35 @@ namespace SearchDirectoryTool
 {
     class PathDispatcher
     {
-        public static string DIRS_FILE = "dirs.txt";
+        public static string DIRS_FILE;
+        public static string EXE_DIR;
         private List<DirectoryElement> directories;
+
+        public PathDispatcher()
+        {
+            string EXE_PATH = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            EXE_DIR = Path.GetDirectoryName(EXE_PATH);
+            DIRS_FILE = EXE_DIR + "\\dirs.txt"; 
+        }
 
         public void LoadDirs()
         {
             if (!File.Exists(DIRS_FILE))
             {
-                File.Create(DIRS_FILE);
+                using (File.Create(DIRS_FILE));
             }
             using (StreamReader file = new StreamReader(DIRS_FILE))
             {
                 directories = new List<DirectoryElement>();
 
-                string str;
-                while ((str = file.ReadLine()) != null)
+                string str1, str2;
+                while ((str1 = file.ReadLine()) != null)
                 {
                     DirectoryElement current = new DirectoryElement();
 
-                    str = file.ReadLine();
-                    string[] secondLine = str.Split(" ");
-                    if (secondLine.Length == 1)
+                    str2 = file.ReadLine();
+                    string[] secondLine = str2.Split(" ");
+                    if (secondLine.Length == 2)
                     {
                         int counter;
                         try
@@ -40,7 +48,7 @@ namespace SearchDirectoryTool
                         }
 
                         string alias = secondLine[1];
-                        current.fullpath = str;
+                        current.fullpath = str1;
                         current.count = counter;
                         current.alias = alias;
 
@@ -133,6 +141,16 @@ namespace SearchDirectoryTool
             int firstPos = path.LastIndexOf('\\', lastPos - 1);
 
             return path.Substring(firstPos + 1, lastPos - firstPos - 1);
+        }
+
+        public void PrintDirs()
+        {
+            LoadDirs();
+            foreach (var d in directories)
+            {
+                Console.WriteLine(d.fullpath);
+                Console.WriteLine(d.count + " " + d.alias);
+            }
         }
     }
 }
