@@ -79,10 +79,7 @@ namespace SearchDirectoryTool
             }
             if (fullPath != null)
             {
-                if (Environment.GetEnvironmentVariable("COMMANDER_EXE") == null)
-                {
-                    Directory.SetCurrentDirectory(fullPath);
-                } else
+                if (Environment.GetEnvironmentVariable("COMMANDER_EXE") != null)
                 {
                     string commanderEXE = Environment.GetEnvironmentVariable("COMMANDER_EXE");
                     Process process = Process.Start(commanderEXE, "/S /O " + fullPath);
