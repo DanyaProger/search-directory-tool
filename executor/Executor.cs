@@ -19,76 +19,53 @@ namespace SearchDirectoryTool
 
         public void run()
         {
-            if (arguments.args.Length == 1)
-            {
-                if (!arguments.optionalArgument.Equals(new KeyValuePair<string, string>()))
-                {
-                    if (arguments.optionalArgument.Key == "alias")
-                    {
-                        ChangeDirectory(arguments.args[0], arguments.optionalArgument.Value);
-                    } else
-                    {
-                        Console.WriteLine("Wrong name or position of parameter: " + arguments.optionalArgument.Key);
-                    }
-                } else
-                {
-                    ChangeDirectory(arguments.args[0]);
-                }
-            } else if (arguments.args.Length == 0)
-            {
-                if (!arguments.optionalArgument.Equals(new KeyValuePair<string, string>()))
-                {
-                    if (arguments.optionalArgument.Key == "alias")
-                    {
-                        ChangeDirectory("", arguments.optionalArgument.Value);
-                    } else if (arguments.optionalArgument.Key == "path")
-                    {
-                        //AddToPath(arguments.args[0]);
-                    } else
-                    {
-                        Console.WriteLine("Wrong name of parameter: " + arguments.optionalArgument.Key);
-                    }
-                }
-            } else
-            {
-                Console.WriteLine("Wrong set of arguments");
-            }
-        }
-
-        private void ChangeDirectory(string path, string alias="")
-        {
             pathHelper.LoadDirs();
 
-            string fullPath;
-            string checkedPath;
-            if (!alias.Equals(""))
+            string path;
+            bool isOptional = !arguments.optionalArgument.Equals(new KeyValuePair<string, string>());
+
+            if (arguments.args.Length == 0)
             {
-                checkedPath = alias;
+                path = Directory.GetCurrentDirectory();
+            }
+            else if (arguments.args.Length == 1)
+            {
+                path = arguments.args[0];
             } else
             {
-                checkedPath = path;
+                Console.WriteLine("Wrong number of parameters: " + arguments.args.Length);
+                return;
             }
 
-            fullPath = pathHelper.UpdateMostSuitablePath(checkedPath);
-            if (fullPath == null)
+            if (isOptional && !arguments.optionalArgument.Key.Equals("alias"))
             {
-                if (path.Equals(""))
-                    path = Directory.GetCurrentDirectory();
-                if (pathHelper.IsFullPath(path))
-                    fullPath = pathHelper.AddPath(path, alias);
+                Console.WriteLine("Unknown optional parameter");
+                return;
             }
+            string fullPath = pathHelper.UpdateMostSuitablePath(path);
+            if (fullPath != null)
+            {
+                if (isOptional)
+                {
+                    pathHelper.UpdateAlias(fullPath, arguments.optionalArgument.Value);
+                }
+                ChangeDirectory(fullPath);
+            }
+
+            pathHelper.SaveDirs();
+        }
+
+        private void ChangeDirectory(string fullPath)
+        {
             if (fullPath != null)
             {
                 if (Environment.GetEnvironmentVariable("COMMANDER_EXE") != null)
                 {
                     string commanderEXE = Environment.GetEnvironmentVariable("COMMANDER_EXE");
-                    Process process = Process.Start(commanderEXE, "/S /O " + fullPath);
+                    Process process = Process.Start(commanderEXE, "/S /O " + "\"" + fullPath + "\"");
                     process.WaitForExit();
                 }
-
             }
-            
-            pathHelper.SaveDirs();
         }
 
         private void AddToPath(string path)

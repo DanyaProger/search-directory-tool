@@ -85,6 +85,11 @@ namespace SearchDirectoryTool
                     index = i;
                     break;
                 }
+                if (IsFullPath(path) && Path.GetFullPath(path).Equals(directories[i].fullpath))
+                {
+                    index = i;
+                    break;
+                }
                 if (GetLastDir(directories[i].fullpath).ToLower().IndexOf(path.ToLower()) != -1)
                 {
                     if (directories[i].count > maxCount)
@@ -95,6 +100,12 @@ namespace SearchDirectoryTool
                 }
             }
 
+            if (index == -1 && IsFullPath(path))
+            {
+                DirectoryElement dir = new DirectoryElement(Path.GetFullPath(path), "");
+                directories.Add(dir);
+                return dir.fullpath;
+            }
             if (index != -1)
             {
                 directories[index].count += 1;
@@ -104,6 +115,17 @@ namespace SearchDirectoryTool
                 return null;
             }
             
+        }
+
+        public void UpdateAlias(string fullPath, string alias)
+        {
+            foreach(var dir in directories)
+            {
+                if (dir.fullpath.Equals(fullPath))
+                {
+                    dir.alias = alias;
+                }
+            }
         }
 
         public bool IsFullPath(string path)
