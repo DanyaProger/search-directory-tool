@@ -6,11 +6,9 @@ namespace SearchDirectoryTool
 {
     class SDTool
     {
-        private Arguments arguments;
-        
-        public void pipeline(string[] args)
+        public static void Main(string[] args)
         {
-            arguments = ArgumentParser.splitArguments(args);
+            Arguments arguments = ArgumentParser.splitArguments(args);
             Executor executor = new Executor(arguments);
             executor.run();
         }
