@@ -27,6 +27,12 @@ namespace TerminalSender.processes
                 Console.WriteLine(e.StackTrace);
             }
         }
+
+        public static void WaitProcessEnd(int pid)
+        {
+            Process process = Process.GetProcessById(pid);
+            process.WaitForExit();
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
