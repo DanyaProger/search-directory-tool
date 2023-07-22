@@ -1,5 +1,6 @@
 ﻿using System;
-using TerminalSender.processes;
+using System.Diagnostics;
+using TerminalSender.winapi;
 
 namespace TerminalSender
 {
@@ -7,14 +8,29 @@ namespace TerminalSender
     {
         static void Main(string[] args)
         {
-            if (args.Length == 1)
+            if (args.Length == 3)
             {
-                ProcessHelper.printParentProcesses();
-                ProcessHelper.WaitProcessEnd(int.Parse(args[0]));
-                Console.WriteLine("TotalCommander exited");
-                Console.ReadKey();
-            }
+                int sdProcessId = int.Parse(args[0]);
+                int terminalWindowProcessId = int.Parse(args[1]);
+                string fullPath = args[2];
 
+                Process sdProcess = null;
+                try
+                {
+                    sdProcess = Process.GetProcessById(sdProcessId);
+                } catch (Exception e)
+                {
+                    sdProcess = null;
+                }
+                Process terminalWindowProcess = Process.GetProcessById(terminalWindowProcessId);
+
+                if (sdProcess != null && !sdProcess.HasExited && sdProcess.ProcessName.Equals("sd"))
+                {
+                    sdProcess.WaitForExit();
+                }
+
+                WinApi.PostMessage(terminalWindowProcess.MainWindowHandle, "cd " + fullPath + Environment.NewLine);
+            }
         }
     }
 }

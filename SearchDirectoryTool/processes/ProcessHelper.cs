@@ -5,11 +5,11 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace TerminalSender.processes
+namespace SearchDirectoryTool.processes
 {
     class ProcessHelper
     {
-        public static void printParentProcesses(int depth = 1)
+        public static void PrintParentProcesses(int depth = 1)
         {
             Process process = Process.GetCurrentProcess();
             try
@@ -22,7 +22,8 @@ namespace TerminalSender.processes
 
                     process = parentProcess;
                 }
-            } catch (InvalidOperationException e)
+            }
+            catch (InvalidOperationException e)
             {
                 Console.WriteLine(e.StackTrace);
             }
@@ -32,6 +33,16 @@ namespace TerminalSender.processes
         {
             Process process = Process.GetProcessById(pid);
             process.WaitForExit();
+        }
+
+        public static Process GetParentProcess()
+        {
+            return ParentProcessUtilities.GetParentProcess();
+        }
+
+        public static Process GetParentProcess(int id)
+        {
+            return ParentProcessUtilities.GetParentProcess(id);
         }
     }
 
