@@ -29,7 +29,7 @@ namespace TerminalSender
                     sdProcess.WaitForExit();
                 }
 
-                WinApi.PostMessage(terminalWindowProcess.MainWindowHandle, "cd " + fullPath + Environment.NewLine);
+                WinApi.PostMessage(terminalWindowProcess.MainWindowHandle, "cd " + fullPath);
             }
         }
     }
