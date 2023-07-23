@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Diagnostics;
+using SearchDirectoryTool.terminal;
 
 namespace SearchDirectoryTool
 {
@@ -15,6 +16,7 @@ namespace SearchDirectoryTool
         {
             this.arguments = arguments;
             pathHelper = new PathDispatcher();
+            
         }
 
         public void run()
@@ -49,23 +51,10 @@ namespace SearchDirectoryTool
                 {
                     pathHelper.UpdateAlias(fullPath, arguments.optionalArgument.Value);
                 }
-                ChangeDirectory(fullPath);
+                TerminalDispatcher.ChangeDirectory(fullPath);
             }
 
             pathHelper.SaveDirs();
-        }
-
-        private void ChangeDirectory(string fullPath)
-        {
-            if (fullPath != null)
-            {
-                if (Environment.GetEnvironmentVariable("COMMANDER_EXE") != null)
-                {
-                    string commanderEXE = Environment.GetEnvironmentVariable("COMMANDER_EXE");
-                    Process process = Process.Start(commanderEXE, "/S /O " + "\"" + fullPath + "\"");
-                    process.WaitForExit();
-                }
-            }
         }
 
         private void AddToPath(string path)
