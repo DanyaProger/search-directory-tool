@@ -40,7 +40,23 @@ namespace SearchDirectoryTool.terminal
 
         public static void ChangeMinTTYDirectory(string fullPath, Process parentProcess)
         {
+            Process parent2 = ProcessHelper.GetParentProcess(parentProcess.Id);
+            if (parent2.ProcessName.Equals("bash"))
+            {
+                Process[] minttys = Process.GetProcessesByName("mintty");
+                TimeSpan minDifference = TimeSpan.MaxValue;
+                Process rightProcess = null;
+                foreach (Process process in minttys)
+                {
+                    if ((parent2.StartTime - process.StartTime).Duration() < minDifference)
+                    {
+                        minDifference = (parent2.StartTime - process.StartTime).Duration();
+                        rightProcess = process;
+                    }
+                }
 
+                SendToTerminal(rightProcess.Id, fullPath);
+            }
         }
 
         public static void SendToTerminal(int terminalWindowProcessId, string fullPath)

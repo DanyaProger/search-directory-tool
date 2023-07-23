@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using TerminalSender.winapi;
 
 namespace TerminalSender
@@ -29,7 +30,15 @@ namespace TerminalSender
                     sdProcess.WaitForExit();
                 }
 
-                WinApi.PostMessage(terminalWindowProcess.MainWindowHandle, "cd " + fullPath);
+                if (terminalWindowProcess.ProcessName.Equals("mintty"))
+                {
+                    Thread.Sleep(100);
+                    WinApi.PostMessage(terminalWindowProcess.MainWindowHandle, "cd " + "'" + fullPath + "'\n");
+                }
+                else
+                {
+                    WinApi.PostMessage(terminalWindowProcess.MainWindowHandle, "cd " + fullPath);
+                }
             }
         }
     }
