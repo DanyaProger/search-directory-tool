@@ -40,7 +40,12 @@ namespace SearchDirectoryTool.terminal
         public static void SendToTerminal(Process terminalProcess, string fullPath)
         {
             int currentProcessId = Process.GetCurrentProcess().Id;
-            Process terminalSenderProcess = Process.Start("TerminalSender\\TerminalSender.exe", currentProcessId + " " + terminalProcess.ProcessName + " \"" + fullPath + "\"");
+
+            ProcessStartInfo startInfo = new ProcessStartInfo("TerminalSender\\TerminalSender.exe");
+            startInfo.ArgumentList.Add(currentProcessId.ToString());
+            startInfo.ArgumentList.Add(terminalProcess.ProcessName);
+            startInfo.ArgumentList.Add(fullPath);
+            Process terminalSenderProcess = Process.Start(startInfo);
         }
     }
 }
