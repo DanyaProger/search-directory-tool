@@ -14,12 +14,11 @@ namespace SearchDirectoryTool.terminal
             if (parentProcess.ProcessName.Equals("TOTALCMD64"))
             {
                 ChangeTotalCommanderDirectory(fullPath);
-            } else if (parentProcess.ProcessName.Equals("bash"))
+            } else if (parentProcess.ProcessName.Equals("bash") ||
+                parentProcess.ProcessName.Equals("cmd") ||
+                parentProcess.ProcessName.Equals("powershell"))
             {
-                ChangeMinTTYDirectory(fullPath, parentProcess);
-            } else
-            {
-                ChangeUsualTerminalDirectory(fullPath, parentProcess);
+                ChangeTerminalDirectory(fullPath, parentProcess);
             }
         }
 
@@ -33,36 +32,15 @@ namespace SearchDirectoryTool.terminal
             }
         }
 
-        public static void ChangeUsualTerminalDirectory(string fullPath, Process parentProcess)
+        public static void ChangeTerminalDirectory(string fullPath, Process parentProcess)
         {
-            SendToTerminal(parentProcess.Id, fullPath);
+            SendToTerminal(parentProcess, fullPath);
         }
 
-        public static void ChangeMinTTYDirectory(string fullPath, Process parentProcess)
-        {
-            Process parent2 = ProcessHelper.GetParentProcess(parentProcess.Id);
-            if (parent2.ProcessName.Equals("bash"))
-            {
-                Process[] minttys = Process.GetProcessesByName("mintty");
-                TimeSpan minDifference = TimeSpan.MaxValue;
-                Process rightProcess = null;
-                foreach (Process process in minttys)
-                {
-                    if ((parent2.StartTime - process.StartTime).Duration() < minDifference)
-                    {
-                        minDifference = (parent2.StartTime - process.StartTime).Duration();
-                        rightProcess = process;
-                    }
-                }
-
-                SendToTerminal(rightProcess.Id, fullPath);
-            }
-        }
-
-        public static void SendToTerminal(int terminalWindowProcessId, string fullPath)
+        public static void SendToTerminal(Process terminalProcess, string fullPath)
         {
             int currentProcessId = Process.GetCurrentProcess().Id;
-            Process terminalSenderProcess = Process.Start("TerminalSender\\TerminalSender.exe", currentProcessId + " " + terminalWindowProcessId + " \"" + fullPath + "\"");
+            Process terminalSenderProcess = Process.Start("TerminalSender\\TerminalSender.exe", currentProcessId + " " + terminalProcess.ProcessName + " \"" + fullPath + "\"");
         }
     }
 }
