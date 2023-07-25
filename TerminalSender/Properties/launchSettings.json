@@ -1,8 +1,7 @@
 {
   "profiles": {
     "TerminalSender": {
-      "commandName": "Project",
-      "commandLineArgs": "20000 1384 C:\\Users\\Danila_Maiseyenkau\\Downloads"
+      "commandName": "Project"
     }
   }
 }

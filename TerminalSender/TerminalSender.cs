@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading;
-using TerminalSender.winapi;
+using WindowsInput;
+using WindowsInput.Native;
 
 namespace TerminalSender
 {
@@ -12,7 +13,7 @@ namespace TerminalSender
             if (args.Length == 3)
             {
                 int sdProcessId = int.Parse(args[0]);
-                int terminalWindowProcessId = int.Parse(args[1]);
+                string terminalProcessName = args[1];
                 string fullPath = args[2];
 
                 Process sdProcess = null;
@@ -23,21 +24,24 @@ namespace TerminalSender
                 {
                     sdProcess = null;
                 }
-                Process terminalWindowProcess = Process.GetProcessById(terminalWindowProcessId);
 
                 if (sdProcess != null && !sdProcess.HasExited && sdProcess.ProcessName.Equals("sd"))
                 {
                     sdProcess.WaitForExit();
                 }
 
-                if (terminalWindowProcess.ProcessName.Equals("mintty"))
+                InputSimulator sim = new InputSimulator();
+
+                if (terminalProcessName.Equals("bash"))
                 {
                     Thread.Sleep(100);
-                    WinApi.PostMessage(terminalWindowProcess.MainWindowHandle, "cd " + "'" + fullPath + "'\n");
+                    sim.Keyboard.TextEntry("cd \'" + fullPath + "\'");
+                    sim.Keyboard.KeyDown(VirtualKeyCode.RETURN);
                 }
                 else
                 {
-                    WinApi.PostMessage(terminalWindowProcess.MainWindowHandle, "cd " + fullPath);
+                    sim.Keyboard.TextEntry("cd " + fullPath);
+                    sim.Keyboard.KeyDown(VirtualKeyCode.RETURN);
                 }
             }
         }
