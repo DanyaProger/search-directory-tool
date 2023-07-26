@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using WindowsInput;
 using WindowsInput.Native;
@@ -38,7 +39,19 @@ namespace TerminalSender
                     sim.Keyboard.TextEntry("cd \'" + fullPath + "\'");
                     sim.Keyboard.KeyDown(VirtualKeyCode.RETURN);
                 }
-                else
+                else if (terminalProcessName.Equals("cmd"))
+                {
+                    string message;
+                    if (Path.GetPathRoot(Directory.GetCurrentDirectory()).ToLower().Equals(Path.GetPathRoot(fullPath).ToLower()))
+                    {
+                        message = "cd " + fullPath;
+                    } else
+                    {
+                        message = "cd /D " + fullPath;
+                    }
+                    sim.Keyboard.TextEntry(message);
+                    sim.Keyboard.KeyDown(VirtualKeyCode.RETURN);
+                } else
                 {
                     sim.Keyboard.TextEntry("cd " + fullPath);
                     sim.Keyboard.KeyDown(VirtualKeyCode.RETURN);

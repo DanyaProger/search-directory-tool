@@ -130,7 +130,7 @@ namespace SearchDirectoryTool
 
         public bool IsFullPath(string path)
         {
-            return Path.IsPathRooted(path) && Path.IsPathFullyQualified(path);
+            return Path.IsPathRooted(path) && Path.IsPathFullyQualified(path) && Directory.Exists(path);
         }
 
         public string AddPath(string path, string alias)
