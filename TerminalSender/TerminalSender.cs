@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using WindowsInput;
-using WindowsInput.Native;
 
 namespace TerminalSender
 {
