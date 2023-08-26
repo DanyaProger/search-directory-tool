@@ -1,51 +1,38 @@
 ﻿using SearchDirectoryTool.processes;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 
 namespace SearchDirectoryTool.terminal
 {
     class TerminalDispatcher
     {
+        private static Dictionary<string, IDirectoryChanger> parentProcessNameToDirectoryChanger = new Dictionary<string, IDirectoryChanger>();
+
+        static TerminalDispatcher()
+        {
+            parentProcessNameToDirectoryChanger.Add("TOTALCMD64", new TotalCommanderChanger());
+            parentProcessNameToDirectoryChanger.Add("cmd", new CmdDirectoryChanger());
+            parentProcessNameToDirectoryChanger.Add("powershell", new PowershellDirectoryChanger());
+            parentProcessNameToDirectoryChanger.Add("bash", new BashDirectoryChanger());
+        }
+
         public static void ChangeDirectory(string fullPath)
         {
             Process parentProcess = ProcessHelper.GetParentProcess();
-            if (parentProcess.ProcessName.Equals("TOTALCMD64"))
+
+            IDirectoryChanger directoryChanger = null;
+            if (parentProcessNameToDirectoryChanger.ContainsKey(parentProcess.ProcessName))
             {
-                ChangeTotalCommanderDirectory(fullPath);
-            } else if (parentProcess.ProcessName.Equals("bash") ||
-                parentProcess.ProcessName.Equals("cmd") ||
-                parentProcess.ProcessName.Equals("powershell"))
-            {
-                ChangeTerminalDirectory(fullPath, parentProcess);
+                directoryChanger = parentProcessNameToDirectoryChanger[parentProcess.ProcessName];
             }
-        }
-
-        public static void ChangeTotalCommanderDirectory(string fullPath)
-        {
-            if (Environment.GetEnvironmentVariable("COMMANDER_EXE") != null)
+            else
             {
-                string commanderEXE = Environment.GetEnvironmentVariable("COMMANDER_EXE");
-                Process process = Process.Start(commanderEXE, "/S /O " + "\"" + fullPath + "\"");
-                process.WaitForExit();
+                return;
             }
-        }
 
-        public static void ChangeTerminalDirectory(string fullPath, Process parentProcess)
-        {
-            SendToTerminal(parentProcess, fullPath);
-        }
-
-        public static void SendToTerminal(Process terminalProcess, string fullPath)
-        {
-            int currentProcessId = Process.GetCurrentProcess().Id;
-
-            ProcessStartInfo startInfo = new ProcessStartInfo("TerminalSender\\TerminalSender.exe");
-            startInfo.ArgumentList.Add(currentProcessId.ToString());
-            startInfo.ArgumentList.Add(terminalProcess.ProcessName);
-            startInfo.ArgumentList.Add(fullPath);
-            Process terminalSenderProcess = Process.Start(startInfo);
+            directoryChanger.ChangeDirectory(fullPath);
         }
     }
 }
