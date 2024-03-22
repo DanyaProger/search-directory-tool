@@ -5,12 +5,31 @@ namespace SD.Tests
 {
     public class CmdTest
     {
-        private string lastOutput = "";
+        private const string TEST_BIN_DIR = "test-bin";
+        private string oldPath;
+        private string sdDir;
 
         [SetUp]
         public void Setup()
         {
+            DirectoryInfo directory = new DirectoryInfo(Directory.GetCurrentDirectory());
+            while (!directory.GetFiles("*.sln").Any())
+            {
+                directory = directory.Parent;
+            }
 
+            sdDir = Path.Combine(directory.FullName, TEST_BIN_DIR);
+            Console.WriteLine(sdDir);
+            if (!Directory.Exists(sdDir))
+            {
+                throw new DirectoryNotFoundException();
+            }
+
+            File.WriteAllLines(Path.Combine(sdDir, "sd-pwd.bat"), new string[] { "@echo off", "echo %cd%> " + Path.Combine(sdDir, "pwd.txt") });
+
+            oldPath = Environment.GetEnvironmentVariable("PATH");
+            string newPath = sdDir + ";" + oldPath;
+            Environment.SetEnvironmentVariable("PATH", newPath);
         }
 
         [Test]
@@ -18,7 +37,6 @@ namespace SD.Tests
         {
             InputSimulator simulator = new InputSimulator();
 
-            Console.WriteLine("Hello world!");
             using (Process process = new Process())
             {
                 process.StartInfo.UseShellExecute = true;
@@ -44,8 +62,14 @@ namespace SD.Tests
                 process.WaitForExit();
             }
 
-            string actualDir = File.ReadAllLines("c:\\Users\\Danila_Maiseyenkau\\work\\search-directory-tool\\bin\\pwd.txt")[0];
-            Assert.AreEqual("C:\\Users\\Danila_Maiseyenkau", actualDir);
+            string actualDir = File.ReadAllLines(Path.Combine(sdDir, "pwd.txt"))[0];
+            Assert.AreEqual("C:\\Users\\Danila_Maiseyenkau\\work", actualDir);
+        }
+
+        [TearDown]
+        public void Teardown()
+        {
+            Environment.SetEnvironmentVariable("PATH", oldPath);
         }
     }
 }
