@@ -33,7 +33,7 @@ namespace SD.Tests
         }
 
         [Test]
-        public void SdHome()
+        public void testCmdSdHome()
         {
             InputSimulator simulator = new InputSimulator();
 
@@ -46,6 +46,74 @@ namespace SD.Tests
                 process.Start();
 
                 Thread.Sleep(2000);
+                simulator.Keyboard.TextEntry("sd home");
+                simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
+
+                Thread.Sleep(1000);
+
+                simulator.Keyboard.TextEntry("sd-pwd");
+                simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
+
+                Thread.Sleep(1000);
+
+                simulator.Keyboard.TextEntry("exit");
+                simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
+
+                process.WaitForExit();
+            }
+
+            string actualDir = File.ReadAllLines(Path.Combine(sdDir, "pwd.txt"))[0];
+            Assert.AreEqual("C:\\Users\\Danila_Maiseyenkau\\work", actualDir);
+        }
+
+        [Test]
+        public void testPowershellSdHome()
+        {
+            InputSimulator simulator = new InputSimulator();
+
+            using (Process process = new Process())
+            {
+                process.StartInfo.UseShellExecute = true;
+                process.StartInfo.FileName = "powershell.exe";
+                process.StartInfo.CreateNoWindow = false;
+
+                process.Start();
+
+                Thread.Sleep(2000);
+                simulator.Keyboard.TextEntry("sd home");
+                simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
+
+                Thread.Sleep(1000);
+
+                simulator.Keyboard.TextEntry("sd-pwd");
+                simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
+
+                Thread.Sleep(1000);
+
+                simulator.Keyboard.TextEntry("exit");
+                simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
+
+                process.WaitForExit();
+            }
+
+            string actualDir = File.ReadAllLines(Path.Combine(sdDir, "pwd.txt"))[0];
+            Assert.AreEqual("C:\\Users\\Danila_Maiseyenkau\\work", actualDir);
+        }
+
+        [Test]
+        public void testBashSdHome()
+        {
+            InputSimulator simulator = new InputSimulator();
+
+            using (Process process = new Process())
+            {
+                process.StartInfo.UseShellExecute = true;
+                process.StartInfo.FileName = "C:\\Program Files\\Git\\git-bash.exe";
+                process.StartInfo.CreateNoWindow = false;
+
+                process.Start();
+
+                Thread.Sleep(5000);
                 simulator.Keyboard.TextEntry("sd home");
                 simulator.Keyboard.KeyDown(VirtualKeyCode.RETURN);
 
