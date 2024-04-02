@@ -54,6 +54,7 @@ namespace SD.Tests
 
         protected void TestSdHome()
         {
+            File.Delete(Path.Combine(sdDir, "pwd.txt"));
             Enter("sd home");
 
             Thread.Sleep(1000);

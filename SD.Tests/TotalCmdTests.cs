@@ -1,12 +1,12 @@
 ﻿using WindowsInput;
 
-namespace SD.Tests.cmd
+namespace SD.Tests
 {
-    internal class CmdTests : AbstractChangerTests
+    internal class TotalCmdTests : AbstractChangerTests
     {
         protected override string GetChangerExe()
         {
-            return "cmd.exe";
+            return "C:\\Users\\Danila_Maiseyenkau\\programs\\totalcmd\\TOTALCMD64.EXE";
         }
         protected override int GetInitSleep()
         {
@@ -15,13 +15,15 @@ namespace SD.Tests.cmd
 
         protected override void Enter(string command)
         {
+            inputSimulator.Keyboard.KeyPress(VirtualKeyCode.RIGHT);
             inputSimulator.Keyboard.TextEntry(command);
             inputSimulator.Keyboard.KeyPress(VirtualKeyCode.RETURN);
         }
 
         protected override void EnterExit()
         {
-            inputSimulator.Keyboard.TextEntry("exit");
+            inputSimulator.Keyboard.KeyPress(VirtualKeyCode.RIGHT);
+            inputSimulator.Keyboard.TextEntry("cm_Exit");
             inputSimulator.Keyboard.KeyPress(VirtualKeyCode.RETURN);
         }
 
