@@ -1,4 +1,5 @@
-﻿using WindowsInput;
+﻿using Microsoft.Extensions.Configuration;
+using WindowsInput;
 
 namespace SD.Tests
 {
@@ -6,7 +7,7 @@ namespace SD.Tests
     {
         protected override string GetChangerExe()
         {
-            return "C:\\Users\\Danila_Maiseyenkau\\programs\\totalcmd\\TOTALCMD64.EXE";
+            return TestsConfiguration.TotalCmdExe;
         }
         protected override int GetInitSleep()
         {

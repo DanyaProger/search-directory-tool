@@ -6,7 +6,7 @@ namespace SD.Tests
     {
         protected override string GetChangerExe()
         {
-            return "C:\\Program Files\\Git\\git-bash.exe";
+            return TestsConfiguration.BashExe;
         }
         protected override int GetInitSleep()
         {
