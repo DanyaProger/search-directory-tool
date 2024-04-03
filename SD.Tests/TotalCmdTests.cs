@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using WindowsInput;
+﻿using WindowsInput;
 
 namespace SD.Tests
 {
@@ -9,6 +8,12 @@ namespace SD.Tests
         {
             return TestsConfiguration.TotalCmdExe;
         }
+
+        protected override string[] GetChangerExeArgs()
+        {
+            return new string[] {Directory.GetCurrentDirectory()};
+        }
+
         protected override int GetInitSleep()
         {
             return 2000;

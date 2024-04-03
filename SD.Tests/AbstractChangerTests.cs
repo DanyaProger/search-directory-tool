@@ -17,6 +17,10 @@ namespace SD.Tests
         private Process process;
         protected InputSimulator inputSimulator = new InputSimulator();
         protected abstract string GetChangerExe();
+        protected virtual string[] GetChangerExeArgs()
+        {
+            return new string[0];
+        }
         protected abstract int GetInitSleep();
         protected abstract void Enter(string command);
         protected abstract void EnterExit();
@@ -46,6 +50,8 @@ namespace SD.Tests
             process.StartInfo.UseShellExecute = true;
             process.StartInfo.FileName = GetChangerExe();
             process.StartInfo.CreateNoWindow = false;
+            foreach (string arg in GetChangerExeArgs())
+                process.StartInfo.ArgumentList.Add(arg);
 
             process.Start();
 
