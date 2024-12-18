@@ -1,4 +1,5 @@
-﻿using WindowsInput;
+﻿using SearchDirectoryTool.terminal;
+using WindowsInput;
 
 namespace SD.Tests
 {
@@ -8,6 +9,12 @@ namespace SD.Tests
         {
             return TestsConfiguration.BashExe;
         }
+
+        protected override ITerminalDirectoryChanger GetChangerObject()
+        {
+            return new BashDirectoryChanger();
+        }
+
         protected override int GetInitSleep()
         {
             return 5000;

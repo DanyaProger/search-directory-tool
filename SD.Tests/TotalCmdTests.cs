@@ -1,4 +1,5 @@
-﻿using WindowsInput;
+﻿using SearchDirectoryTool.terminal;
+using WindowsInput;
 
 namespace SD.Tests
 {
@@ -7,6 +8,11 @@ namespace SD.Tests
         protected override string GetChangerExe()
         {
             return TestsConfiguration.TotalCmdExe;
+        }
+
+        protected override ITerminalDirectoryChanger GetChangerObject()
+        {
+            return new TotalCommanderChanger();
         }
 
         protected override string[] GetChangerExeArgs()

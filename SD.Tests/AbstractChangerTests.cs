@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
+﻿using System.Diagnostics;
 using WindowsInput;
+using SearchDirectoryTool.terminal;
 
 namespace SD.Tests
 {
@@ -14,9 +9,11 @@ namespace SD.Tests
         private const string TEST_BIN_DIR = "test-bin";
         private string oldPath;
         private string sdDir;
+        private string startDir;
         private Process process;
         protected InputSimulator inputSimulator = new InputSimulator();
         protected abstract string GetChangerExe();
+        protected abstract ITerminalDirectoryChanger GetChangerObject();
         protected virtual string[] GetChangerExeArgs()
         {
             return new string[0];
@@ -28,6 +25,8 @@ namespace SD.Tests
 
         protected void BeforeAllTests()
         {
+            startDir = Directory.GetCurrentDirectory();
+
             DirectoryInfo directory = new DirectoryInfo(Directory.GetCurrentDirectory());
             while (!directory.GetFiles("*.sln").Any())
             {
@@ -61,6 +60,11 @@ namespace SD.Tests
         protected void TestSdHome()
         {
             File.Delete(Path.Combine(sdDir, "pwd.txt"));
+
+            Enter(GetChangerObject().PathToCdCommand(startDir));
+
+            Thread.Sleep(1000);
+
             Enter("sd home");
 
             Thread.Sleep(1000);

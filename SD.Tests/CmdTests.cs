@@ -1,4 +1,5 @@
-﻿using WindowsInput;
+﻿using SearchDirectoryTool.terminal;
+using WindowsInput;
 
 namespace SD.Tests
 {
@@ -8,6 +9,12 @@ namespace SD.Tests
         {
             return "cmd.exe";
         }
+
+        protected override ITerminalDirectoryChanger GetChangerObject()
+        {
+            return new CmdDirectoryChanger();
+        }
+
         protected override int GetInitSleep()
         {
             return 2000;

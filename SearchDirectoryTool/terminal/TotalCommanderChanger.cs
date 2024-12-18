@@ -1,15 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SearchDirectoryTool.terminal
 {
-    internal class TotalCommanderChanger : IDirectoryChanger
+    public class TotalCommanderChanger : TerminalDirectoryChanger
     {
-        public void ChangeDirectory(string path)
+        public TotalCommanderChanger() : base(0) {}
+
+        public override string PathToCdCommand(string path)
+        {
+            return "cd \"" + path + "\"";
+        }
+
+        public override void ChangeDirectory(string path)
         {
             if (Environment.GetEnvironmentVariable("COMMANDER_EXE") != null)
             {
