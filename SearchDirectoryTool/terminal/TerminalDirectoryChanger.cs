@@ -21,14 +21,17 @@ namespace SearchDirectoryTool.terminal
 
         public virtual void ChangeDirectory(string path)
         {
-            File.AppendAllText("c:\\Users\\Danila_Maiseyenkau\\work\\search-directory-tool\\test-bin\\sd.log", $"Change directory: ${path}");
+            File.AppendAllText("c:\\Users\\danil\\source\\repos\\search-directory-tool\\bin\\TerminalSender\\sd.log", $"Change directory: ${path}");
             int currentProcessId = Process.GetCurrentProcess().Id;
 
-            ProcessStartInfo startInfo = new ProcessStartInfo("TerminalSender\\TerminalSender.exe");
+            string EXE_PATH = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            string EXE_DIR = Path.GetDirectoryName(EXE_PATH);
+            ProcessStartInfo startInfo = new ProcessStartInfo($"{EXE_DIR}\\TerminalSender\\TerminalSender.exe");
             StringBuilder arguments = new StringBuilder();
             arguments.Append(currentProcessId.ToString());
             arguments.Append(" " + Delay().ToString());
-            arguments.Append(" " + PathToCdCommand(path));
+            arguments.Append(" \"" + PathToCdCommand(path) + "\"");
+            startInfo.Arguments = arguments.ToString();
             Process terminalSenderProcess = Process.Start(startInfo);
         }
     }

@@ -15,6 +15,7 @@ namespace SearchDirectoryTool.terminal
             parentProcessNameToDirectoryChanger.Add("TOTALCMD64", new TotalCommanderChanger());
             parentProcessNameToDirectoryChanger.Add("cmd", new CmdDirectoryChanger());
             parentProcessNameToDirectoryChanger.Add("powershell", new PowershellDirectoryChanger());
+            parentProcessNameToDirectoryChanger.Add("VsDebugConsole", new CmdDirectoryChanger());
             parentProcessNameToDirectoryChanger.Add("bash", new BashDirectoryChanger());
         }
 
