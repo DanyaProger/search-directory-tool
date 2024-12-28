@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace SearchDirectoryTool.terminal
 {
@@ -24,9 +25,10 @@ namespace SearchDirectoryTool.terminal
             int currentProcessId = Process.GetCurrentProcess().Id;
 
             ProcessStartInfo startInfo = new ProcessStartInfo("TerminalSender\\TerminalSender.exe");
-            startInfo.ArgumentList.Add(currentProcessId.ToString());
-            startInfo.ArgumentList.Add(Delay().ToString());
-            startInfo.ArgumentList.Add(PathToCdCommand(path));
+            StringBuilder arguments = new StringBuilder();
+            arguments.Append(currentProcessId.ToString());
+            arguments.Append(" " + Delay().ToString());
+            arguments.Append(" " + PathToCdCommand(path));
             Process terminalSenderProcess = Process.Start(startInfo);
         }
     }

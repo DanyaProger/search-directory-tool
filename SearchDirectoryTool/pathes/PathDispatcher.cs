@@ -34,7 +34,7 @@ namespace SearchDirectoryTool
                     DirectoryElement current = new DirectoryElement();
 
                     str2 = file.ReadLine();
-                    string[] secondLine = str2.Split(" ");
+                    string[] secondLine = str2.Split(' ');
                     if (secondLine.Length == 2)
                     {
                         int counter;
@@ -128,9 +128,15 @@ namespace SearchDirectoryTool
             }
         }
 
+        private bool IsPathFullyQualified(string path)
+        {
+            var root = Path.GetPathRoot(path);
+            return root.StartsWith(@"\\") || root.EndsWith(@"\") && root != @"\";
+        }
+
         public bool IsFullPath(string path)
         {
-            return Path.IsPathRooted(path) && Path.IsPathFullyQualified(path) && Directory.Exists(path);
+            return Path.IsPathRooted(path) && IsPathFullyQualified(path) && Directory.Exists(path);
         }
 
         public string AddPath(string path, string alias)
