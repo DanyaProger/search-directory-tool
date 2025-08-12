@@ -1,6 +1,6 @@
 ﻿namespace SearchDirectoryTool.terminal
 {
-    internal interface ITerminalDirectoryChanger : IDirectoryChanger
+    public interface ITerminalDirectoryChanger : IDirectoryChanger
     {
         string PathToCdCommand(string path);
         int Delay();

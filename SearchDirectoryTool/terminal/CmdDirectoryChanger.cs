@@ -2,7 +2,7 @@
 
 namespace SearchDirectoryTool.terminal
 {
-    internal class CmdDirectoryChanger : TerminalDirectoryChanger
+    public class CmdDirectoryChanger : TerminalDirectoryChanger
     {
         public CmdDirectoryChanger() : base(0) { }
 

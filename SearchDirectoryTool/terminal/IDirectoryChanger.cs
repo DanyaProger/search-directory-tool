@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SearchDirectoryTool.terminal
+﻿namespace SearchDirectoryTool.terminal
 {
-    interface IDirectoryChanger
+    public interface IDirectoryChanger
     {
         void ChangeDirectory(string path);
     }
