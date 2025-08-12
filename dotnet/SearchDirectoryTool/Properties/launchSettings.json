@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SearchDirectoryTool": {
+      "commandName": "Project",
+      "commandLineArgs": "bin"
+    }
+  }
+}
