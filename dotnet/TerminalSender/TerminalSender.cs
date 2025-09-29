@@ -12,7 +12,6 @@ namespace TerminalSender
         {
             if (args.Length == 3)
             {
-                File.AppendAllText("c:\\Users\\danil\\source\\repos\\search-directory-tool\\bin\\TerminalSender\\ts.log", $"{args[0]} {args[1]} {args[2]}\n");
                 int sdProcessId = int.Parse(args[0]);
                 int delay = int.Parse(args[1]);
                 string cdCommand = args[2];
