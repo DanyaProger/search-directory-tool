@@ -21,7 +21,6 @@ namespace SearchDirectoryTool.terminal
 
         public virtual void ChangeDirectory(string path)
         {
-            File.AppendAllText("c:\\Users\\danil\\source\\repos\\search-directory-tool\\bin\\sd.log", $"Change directory: ${path}");
             int currentProcessId = Process.GetCurrentProcess().Id;
 
             string EXE_PATH = System.Reflection.Assembly.GetExecutingAssembly().Location;
