@@ -7,21 +7,27 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/Debug/search-directory-tool" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/Debug/sd" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
-				<Option type="1" />
+				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-std=gnu++17" />
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-static" />
+				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/Release/search-directory-tool" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/Release/sd" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
-				<Option type="1" />
+				<Option type="0" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-O2" />
+					<Add option="-O3" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -30,11 +36,25 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-std=gnu++17" />
 			<Add option="-fexceptions" />
+			<Add directory="../RecordsDispatcher" />
+			<Add directory="../DirectoryChangers" />
 		</Compiler>
+		<Linker>
+			<Add option="-static-libstdc++" />
+			<Add option="-static-libgcc" />
+			<Add option="-static" />
+			<Add option="-municode" />
+			<Add library="../RecordsDispatcher/bin/Debug/libRecordsDispatcher.a" />
+			<Add library="../DirectoryChangers/bin/Debug/libDirectoryChangers.a" />
+		</Linker>
+		<Unit filename="Executor.cpp" />
+		<Unit filename="Executor.h" />
+		<Unit filename="TerminalDispatcher.h" />
+		<Unit filename="argsparser.h" />
 		<Unit filename="main.cpp" />
-		<Extensions>
-			<lib_finder disable_auto="1" />
-		</Extensions>
+		<Unit filename="processes_helper.h" />
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

@@ -1,23 +1,19 @@
-#ifndef CMDTESTS_H_INCLUDED
-#define CMDTESTS_H_INCLUDED
+#ifndef TOTALCOMMANDERTESTS_H_INCLUDED
+#define TOTALCOMMANDERTESTS_H_INCLUDED
 
-#include "AbstractChangerTests.h"
-#include "InputSimulator.h"
-#include "DirectoryChangers.h"
-
-class CmdTests : public AbstractChangerTests
+class TotalCommanderTests : public AbstractChangerTests
 {
 private:
-    CmdDirectoryChanger changer;
+    TotalCommanderDirectoryChanger changer;
 protected:
     string get_test_class_name() override
     {
-        return "CmdTests";
+        return "TotalCommanderTests";
     }
 
     wstring get_terminal_exe() override
     {
-        return L"C:\\Windows\\System32\\cmd.exe";
+        return L"D:\\Soft\\totalcmd\\TOTALCMD64.EXE";
     }
 
     TerminalDirectoryChanger* get_terminal_changer() override
@@ -32,15 +28,17 @@ protected:
 
     void send_command(wstring command) override
     {
+        key_press(VK_RIGHT);
         text_entry(command);
         key_press(VK_RETURN);
     }
 
     void send_exit() override
     {
-        text_entry(L"exit");
+        key_press(VK_RIGHT);
+        text_entry(L"cm_Exit");
         key_press(VK_RETURN);
     }
 };
 
-#endif // CMDTESTS_H_INCLUDED
+#endif // TOTALCOMMANDERTESTS_H_INCLUDED

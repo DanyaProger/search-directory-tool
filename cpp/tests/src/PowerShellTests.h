@@ -1,23 +1,23 @@
-#ifndef CMDTESTS_H_INCLUDED
-#define CMDTESTS_H_INCLUDED
+#ifndef POWERSHELLTESTS_H_INCLUDED
+#define POWERSHELLTESTS_H_INCLUDED
 
 #include "AbstractChangerTests.h"
 #include "InputSimulator.h"
 #include "DirectoryChangers.h"
 
-class CmdTests : public AbstractChangerTests
+class PowerShellTests : public AbstractChangerTests
 {
 private:
-    CmdDirectoryChanger changer;
+    PowerShellDirectoryChanger changer;
 protected:
     string get_test_class_name() override
     {
-        return "CmdTests";
+        return "PowerShellTests";
     }
 
     wstring get_terminal_exe() override
     {
-        return L"C:\\Windows\\System32\\cmd.exe";
+        return L"c:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe";
     }
 
     TerminalDirectoryChanger* get_terminal_changer() override
@@ -43,4 +43,4 @@ protected:
     }
 };
 
-#endif // CMDTESTS_H_INCLUDED
+#endif // POWERSHELLTESTS_H_INCLUDED

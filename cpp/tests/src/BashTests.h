@@ -1,23 +1,23 @@
-#ifndef CMDTESTS_H_INCLUDED
-#define CMDTESTS_H_INCLUDED
+#ifndef BASHTESTS_H_INCLUDED
+#define BASHTESTS_H_INCLUDED
 
 #include "AbstractChangerTests.h"
 #include "InputSimulator.h"
 #include "DirectoryChangers.h"
 
-class CmdTests : public AbstractChangerTests
+class BashTests : public AbstractChangerTests
 {
 private:
-    CmdDirectoryChanger changer;
+    BashDirectoryChanger changer;
 protected:
     string get_test_class_name() override
     {
-        return "CmdTests";
+        return "BashTests";
     }
 
     wstring get_terminal_exe() override
     {
-        return L"C:\\Windows\\System32\\cmd.exe";
+        return L"c:\\Program Files\\Git\\git-bash.exe";
     }
 
     TerminalDirectoryChanger* get_terminal_changer() override
@@ -27,7 +27,7 @@ protected:
 
     int get_init_sleep() override
     {
-        return 2000;
+        return 5000;
     }
 
     void send_command(wstring command) override
@@ -43,4 +43,4 @@ protected:
     }
 };
 
-#endif // CMDTESTS_H_INCLUDED
+#endif // BASHTESTS_H_INCLUDED

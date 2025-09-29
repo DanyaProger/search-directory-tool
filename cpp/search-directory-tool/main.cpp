@@ -1,12 +1,11 @@
-#include <bits/stdc++.h>
+#include "argsparser.h"
+#include "Executor.h"
 
 using namespace std;
 
-int main()
+int wmain(int argc, wchar_t** argv)
 {
-    ios_base::sync_with_stdio(false); cin.tie(0);
-    
-    
-    
+    SdArgs sd_args = SdArgsParser().parse(argc, argv);
+    Executor().run(sd_args);
     return 0;
 }
