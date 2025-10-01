@@ -57,6 +57,7 @@
 		<Unit filename="src/AbstractChangerTests.h" />
 		<Unit filename="src/BashTests.h" />
 		<Unit filename="src/CmdTests.h" />
+		<Unit filename="src/ExplorerTests.h" />
 		<Unit filename="src/PowerShellTests.h" />
 		<Unit filename="src/TotalCommanderTests.h" />
 		<Extensions />

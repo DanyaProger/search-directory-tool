@@ -25,7 +25,7 @@ private:
     bool current_test_passed;
     string method_name;
     wstring project_dir = filesystem::absolute(filesystem::path(L"..\\..")).wstring();
-    wstring sd_dir = filesystem::absolute(filesystem::path(L"..\\bin\\Debug")).wstring();
+    wstring sd_dir = filesystem::absolute(filesystem::path(L"..\\bin\\Release")).wstring();
     wstring old_path, new_path;
 
     void reset_check(string method_name)
@@ -70,6 +70,68 @@ private:
         return get_test_class_name() + ":" + method_name + ":" + to_string(counter);
     }
 
+    wstring get_path_variable_in_registry(DWORD& path_type)
+    {
+        HKEY hKey;
+        RegOpenKeyExW(HKEY_CURRENT_USER, L"Environment", 0, KEY_ALL_ACCESS, &hKey);
+        BYTE* buffer;
+        DWORD bufferSize = 1000;
+        buffer = new BYTE[bufferSize];
+
+        LSTATUS status = RegQueryValueExA(hKey, "Path", NULL, &path_type, buffer, &bufferSize);
+        if (status == ERROR_SUCCESS)
+        {
+
+        }
+        else if (status != ERROR_MORE_DATA)
+        {
+            RegCloseKey(hKey);
+            wcout << L"error during reading path from registry\r\n";
+            exit(0);
+        }
+        else
+        {
+            delete[] buffer;
+            buffer = new BYTE[bufferSize];
+            RegQueryValueExA(hKey, "Path", NULL, &path_type, buffer, &bufferSize);
+        }
+        RegCloseKey(hKey);
+
+        int str_size = MultiByteToWideChar(CP_ACP, 0, (char*)buffer, bufferSize, NULL, 0);
+        wchar_t* str = new wchar_t[str_size];
+        MultiByteToWideChar(CP_ACP, 0, (char*)buffer, bufferSize, str, str_size);
+
+        wstring path(str, str_size);
+        delete[] buffer;
+        delete[] str;
+        return path;
+    }
+
+    void set_path_variable_in_registry(wstring value, DWORD path_type)
+    {
+        int buffer_size = WideCharToMultiByte(CP_ACP, 0, value.c_str(), value.size(), NULL, 0 , NULL, NULL);
+        BYTE* buffer = new BYTE[buffer_size + 2];
+        WideCharToMultiByte(CP_ACP, 0, value.c_str(), value.size(), (char*)buffer, buffer_size, NULL, NULL);
+
+        HKEY hKey;
+        RegOpenKeyExW(HKEY_CURRENT_USER, L"Environment", 0, KEY_ALL_ACCESS, &hKey);
+
+        RegSetValueExA(hKey, "Path", NULL, path_type, buffer, buffer_size);
+
+        RegCloseKey(hKey);
+
+        delete[] buffer;
+
+        /*PROCESS_INFORMATION setx_exe_info;
+        STARTUPINFOW info={sizeof(info)};
+        wstring setx_exe(L"c:\\Windows\\System32\\setx.exe");
+        wstring args = setx_exe + L" Path \"" + value + L"\"";
+        CreateProcessW(L"c:\\Windows\\System32\\setx.exe", const_cast<wchar_t*>(args.c_str()), NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &info, &setx_exe_info);
+        WaitForSingleObject(setx_exe_info.hProcess, INFINITE);
+        CloseHandle(setx_exe_info.hProcess);
+        CloseHandle(setx_exe_info.hThread);*/
+    }
+
 protected:
     virtual wstring get_terminal_exe(){};
     virtual TerminalDirectoryChanger* get_terminal_changer(){};
@@ -85,9 +147,41 @@ protected:
 public:
     void before_all_tests()
     {
-        old_path = wstring(_wgetenv(L"PATH"));
+        /*old_path = wstring(_wgetenv(L"PATH"));
         new_path = sd_dir + L";" + old_path;
-        _wputenv((L"PATH=" + new_path).c_str());
+        _wputenv((L"PATH=" + new_path).c_str());*/
+
+        /*DWORD path_type;
+        wstring path;
+        if (filesystem::exists(filesystem::path(path_txt)))
+        {
+            wifstream txt(filesystem::path(path_txt.c_str()));
+            txt.imbue(std::locale(txt.getloc(), new std::codecvt_utf8<wchar_t>));
+            getline(txt, path);
+            txt.close();
+            filesystem::remove(filesystem::path(path_txt));
+
+            get_path_variable_in_registry(path_type);
+            set_path_variable_in_registry(path, path_type);
+        }
+        path = get_path_variable_in_registry(path_type);
+
+        wstring new_path = sd_dir + L";" + path;
+
+        set_path_variable_in_registry(new_path, path_type);
+
+        wofstream txt(filesystem::path(path_txt.c_str()));
+        txt.imbue(std::locale(txt.getloc(), new std::codecvt_utf8<wchar_t>));
+        txt << path;
+        txt.close();
+
+        wcout << get_path_variable_in_registry(path_type) << "\r\n";*/
+
+        if (filesystem::exists(sd_dir + L"\\dirs.txt") && !filesystem::exists(sd_dir + L"\\dirs.txt"))
+        {
+            filesystem::rename(sd_dir + L"\\dirs.txt", sd_dir + L"\\dirs1.txt");
+            filesystem::remove(sd_dir + L"\\dirs.txt");
+        }
 
         RecordsDispatcher records(sd_dir + L"\\dirs.txt");
         records.load_dirs();
@@ -332,7 +426,28 @@ public:
 
         filesystem::remove_all(project_dir + L"\\tmp");
 
-        _wputenv((L"PATH=" + old_path).c_str());
+        if (filesystem::exists(sd_dir + L"\\dirs1.txt"))
+        {
+            if (filesystem::exists(sd_dir + L"\\dirs.txt"))
+                filesystem::remove(sd_dir + L"\\dirs.txt");
+            filesystem::rename(sd_dir + L"\\dirs1.txt", sd_dir + L"\\dirs.txt");
+            filesystem::remove(sd_dir + L"\\dirs1.txt");
+        }
+
+        /*DWORD path_type;
+        wstring path;
+
+        if (filesystem::exists(path_txt))
+        {
+            wifstream txt(filesystem::path(path_txt.c_str()));
+            txt.imbue(std::locale(txt.getloc(), new std::codecvt_utf8<wchar_t>));
+            getline(txt, path);
+            txt.close();
+            filesystem::remove(filesystem::path(path_txt));
+
+            get_path_variable_in_registry(path_type);
+            set_path_variable_in_registry(path, path_type);
+        }*/
     }
 };
 

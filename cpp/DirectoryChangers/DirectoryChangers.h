@@ -14,8 +14,9 @@ public:
 class TerminalDirectoryChanger : public DirectoryChanger
 {
 private:
-    wstring exe_path;
     int delay;
+protected:
+    wstring exe_path;
 public:
     TerminalDirectoryChanger(int delay);
     TerminalDirectoryChanger(wstring exe_path, int delay);
@@ -58,6 +59,17 @@ class TotalCommanderDirectoryChanger : public TerminalDirectoryChanger
 {
 public:
     TotalCommanderDirectoryChanger();
+
+    wstring path_to_cd_command(wstring path) override;
+
+    void change_directory(wstring path) override;
+};
+
+class ExplorerDirectoryChanger : public TerminalDirectoryChanger
+{
+public:
+    ExplorerDirectoryChanger();
+    ExplorerDirectoryChanger(wstring exe_path);
 
     wstring path_to_cd_command(wstring path) override;
 

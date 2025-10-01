@@ -24,21 +24,32 @@ void text_entry(wstring text) {
     delete[] inputs;
 }
 
-void key_press(WORD vk)
+void key_down(WORD vk)
 {
-    INPUT inputs[2] = {};
+    INPUT inputs[1] = {};
     inputs[0].type = INPUT_KEYBOARD;
     inputs[0].ki.wVk = vk;
     inputs[0].ki.wScan = 0;
     inputs[0].ki.time = 0;
     inputs[0].ki.dwFlags = 0;
     inputs[0].ki.dwExtraInfo = 0;
-    inputs[1].type = INPUT_KEYBOARD;
-    inputs[1].ki.wVk = vk;
-    inputs[1].ki.wScan = 0;
-    inputs[1].ki.time = 0;
-    inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
-    inputs[1].ki.dwExtraInfo = 0;
-
     SendInput(ARRAYSIZE(inputs), inputs, sizeof(INPUT));
+}
+
+void key_up(WORD vk)
+{
+    INPUT inputs[1] = {};
+    inputs[0].type = INPUT_KEYBOARD;
+    inputs[0].ki.wVk = vk;
+    inputs[0].ki.wScan = 0;
+    inputs[0].ki.time = 0;
+    inputs[0].ki.dwFlags = KEYEVENTF_KEYUP;
+    inputs[0].ki.dwExtraInfo = 0;
+    SendInput(ARRAYSIZE(inputs), inputs, sizeof(INPUT));
+}
+
+void key_press(WORD vk)
+{
+    key_down(vk);
+    key_up(vk);
 }
