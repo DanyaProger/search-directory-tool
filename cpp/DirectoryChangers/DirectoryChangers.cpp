@@ -160,3 +160,11 @@ void ExplorerDirectoryChanger::change_directory(wstring path)
     CloseHandle(processInformation.hProcess);
     CloseHandle(processInformation.hThread);
 }
+
+FarDirectoryChanger::FarDirectoryChanger() : TerminalDirectoryChanger(0){}
+FarDirectoryChanger::FarDirectoryChanger(wstring exe_path) : TerminalDirectoryChanger(exe_path, 0){}
+
+wstring FarDirectoryChanger::path_to_cd_command(wstring path)
+{
+    return L"cd " + path;
+}

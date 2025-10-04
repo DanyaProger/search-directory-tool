@@ -76,4 +76,13 @@ public:
     void change_directory(wstring path) override;
 };
 
+class FarDirectoryChanger : public TerminalDirectoryChanger
+{
+public:
+    FarDirectoryChanger();
+    FarDirectoryChanger(wstring exe_path);
+
+    wstring path_to_cd_command(wstring path) override;
+};
+
 #endif // DIRECTORYCHANGER_H_INCLUDED

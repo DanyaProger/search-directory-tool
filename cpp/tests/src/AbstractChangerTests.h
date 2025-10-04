@@ -177,7 +177,7 @@ public:
 
         wcout << get_path_variable_in_registry(path_type) << "\r\n";*/
 
-        if (filesystem::exists(sd_dir + L"\\dirs.txt") && !filesystem::exists(sd_dir + L"\\dirs.txt"))
+        if (filesystem::exists(sd_dir + L"\\dirs.txt") && !filesystem::exists(sd_dir + L"\\dirs1.txt"))
         {
             filesystem::rename(sd_dir + L"\\dirs.txt", sd_dir + L"\\dirs1.txt");
             filesystem::remove(sd_dir + L"\\dirs.txt");
