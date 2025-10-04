@@ -19,6 +19,8 @@ private:
     CmdDirectoryChanger changer2;
     PowerShellDirectoryChanger changer3;
     BashDirectoryChanger changer4;
+    ExplorerDirectoryChanger changer5;
+    FarDirectoryChanger changer6;
     map<wstring, DirectoryChanger*> parent_process_name_to_DirectoryChanger;
 
 public:
@@ -28,11 +30,15 @@ public:
         changer2 = CmdDirectoryChanger(exe_path);
         changer3 = PowerShellDirectoryChanger(exe_path);
         changer4 = BashDirectoryChanger(exe_path);
+        changer5 = ExplorerDirectoryChanger(exe_path);
+        changer6 = FarDirectoryChanger(exe_path);
 
         parent_process_name_to_DirectoryChanger.insert(make_pair(L"TOTALCMD64.EXE", &changer1));
         parent_process_name_to_DirectoryChanger.insert(make_pair(L"cmd.exe", &changer2));
         parent_process_name_to_DirectoryChanger.insert(make_pair(L"powershell.exe", &changer3));
         parent_process_name_to_DirectoryChanger.insert(make_pair(L"bash.exe", &changer4));
+        parent_process_name_to_DirectoryChanger.insert(make_pair(L"explorer.exe", &changer5));
+        parent_process_name_to_DirectoryChanger.insert(make_pair(L"Far.exe", &changer6));
     }
 
     void change_directory(wstring full_path)

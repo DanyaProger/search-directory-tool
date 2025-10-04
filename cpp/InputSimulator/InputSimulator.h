@@ -10,4 +10,8 @@ void text_entry(wstring text);
 
 void key_press(WORD vk);
 
+void key_down(WORD vk);
+
+void key_up(WORD vk);
+
 #endif // INPUTSIMULATOR_H_INCLUDED
