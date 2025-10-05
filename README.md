@@ -19,7 +19,7 @@ This program switches conveniently between directories in terminals and file man
     ```
  - define alias for directory:
     ```
-    sd --alias loads                // create alias "loads" for current directory                        // equivalent cd C:\Users\Username 
+    sd --alias loads                // create alias "loads" for current directory
     ```
  - add a directory with sd.exe to Path environment variable:
    ```
