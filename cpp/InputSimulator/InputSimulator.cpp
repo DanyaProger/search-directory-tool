@@ -5,7 +5,7 @@ using namespace std;
 
 void text_entry(wstring text) {
     INPUT* inputs = new INPUT[text.size() * 2]{};
-    for (int i = 0; i < text.size(); i++) {
+    for (size_t i = 0; i < text.size(); i++) {
         inputs[i * 2].type = INPUT_KEYBOARD;
         inputs[i * 2].ki.wVk = 0;
         inputs[i * 2].ki.wScan = text[i];

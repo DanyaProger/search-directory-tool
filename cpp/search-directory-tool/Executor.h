@@ -163,7 +163,7 @@ public:
         HKEY hKey;
         RegOpenKeyExW(HKEY_CURRENT_USER, L"Environment", 0, KEY_ALL_ACCESS, &hKey);
 
-        RegSetValueExA(hKey, "Path", NULL, path_type, buffer, buffer_size);
+        RegSetValueExA(hKey, "Path", 0, path_type, buffer, buffer_size);
 
         RegCloseKey(hKey);
 
@@ -177,12 +177,12 @@ public:
         DWORD path_type;
         wstring path = get_path_variable_in_registry(path_type);
 
-        int path_size = path.size();
+        size_t path_size = path.size();
         while (path_size > 1 && path[path_size - 1] == L'\0')
             path_size--;
 
         vector<wstring> dirs;
-        int pos = 0, new_pos;
+        size_t pos = 0, new_pos;
         while ((new_pos = path.find(L";", pos)) != wstring::npos)
         {
             dirs.push_back(path.substr(pos, new_pos - pos));
@@ -192,7 +192,7 @@ public:
             dirs.push_back(path.substr(pos));
 
         bool sd_dir_in_path = false;
-        for (int i = 0; i < dirs.size(); i++)
+        for (size_t i = 0; i < dirs.size(); i++)
         {
             if (filesystem::exists(dirs[i]) && filesystem::exists(sd_dir) && filesystem::equivalent(filesystem::path(dirs[i]), filesystem::path(sd_dir)))
             {
@@ -223,12 +223,12 @@ public:
 
         DWORD path_type;
         wstring path = get_path_variable_in_registry(path_type);
-        int path_size = path.size();
+        size_t path_size = path.size();
         while (path_size > 1 && path[path_size - 1] == L'\0')
             path_size--;
 
         vector<wstring> dirs;
-        int pos = 0, new_pos;
+        size_t pos = 0, new_pos;
         while ((new_pos = path.find(L";", pos)) != wstring::npos)
         {
             dirs.push_back(path.substr(pos, new_pos - pos));
@@ -237,19 +237,21 @@ public:
         if (pos < path_size)
             dirs.push_back(path.substr(pos));
 
-        int sd_dir_index_in_path = -1;
-        for (int i = 0; i < dirs.size(); i++)
+        size_t sd_dir_index_in_path;
+        bool sd_dir_in_path = false;
+        for (size_t i = 0; i < dirs.size(); i++)
         {
             if (filesystem::exists(dirs[i]) && filesystem::exists(sd_dir) && filesystem::equivalent(filesystem::path(dirs[i]), filesystem::path(sd_dir)))
             {
                 sd_dir_index_in_path = i;
+                sd_dir_in_path = true;
                 break;
             }
         }
-        if (sd_dir_index_in_path != -1)
+        if (sd_dir_in_path)
         {
             wstring new_path;
-            for (int i = 0; i < dirs.size(); i++)
+            for (size_t i = 0; i < dirs.size(); i++)
                 if (i != sd_dir_index_in_path)
                     new_path += dirs[i] + L';';
             new_path += path.substr(path_size);

@@ -14,11 +14,15 @@
 				<Compiler>
 					<Add option="-std=gnu++17" />
 					<Add option="-g" />
+					<Add directory="../RecordsDispatcher" />
+					<Add directory="../DirectoryChangers" />
 				</Compiler>
 				<Linker>
 					<Add option="-static-libstdc++" />
 					<Add option="-static-libgcc" />
 					<Add option="-static" />
+					<Add library="../RecordsDispatcher/bin/Debug/libRecordsDispatcher.a" />
+					<Add library="../DirectoryChangers/bin/Debug/libDirectoryChangers.a" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -28,9 +32,13 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O3" />
+					<Add directory="../RecordsDispatcher" />
+					<Add directory="../DirectoryChangers" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="../RecordsDispatcher/bin/Release/libRecordsDispatcher.a" />
+					<Add library="../DirectoryChangers/bin/Release/libDirectoryChangers.a" />
 				</Linker>
 			</Target>
 		</Build>
@@ -38,16 +46,12 @@
 			<Add option="-Wall" />
 			<Add option="-std=gnu++17" />
 			<Add option="-fexceptions" />
-			<Add directory="../RecordsDispatcher" />
-			<Add directory="../DirectoryChangers" />
 		</Compiler>
 		<Linker>
 			<Add option="-static-libstdc++" />
 			<Add option="-static-libgcc" />
 			<Add option="-static" />
 			<Add option="-municode" />
-			<Add library="../RecordsDispatcher/bin/Debug/libRecordsDispatcher.a" />
-			<Add library="../DirectoryChangers/bin/Debug/libDirectoryChangers.a" />
 		</Linker>
 		<Unit filename="Executor.cpp" />
 		<Unit filename="Executor.h" />

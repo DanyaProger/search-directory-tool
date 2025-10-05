@@ -49,14 +49,14 @@ public:
         filesystem::path updated_path(path);
 
         int index = -1;
-        for (int i = 0; i < directories.size(); i++)
+        for (size_t i = 0; i < directories.size(); i++)
         {
             filesystem::path current_path(directories[i].full_path);
             if (filesystem::exists(updated_path) && filesystem::exists(current_path) && filesystem::equivalent(updated_path, current_path))
                 index = i;
         }
 
-        for (int i = 0; i < directories.size(); i++)
+        for (size_t i = 0; i < directories.size(); i++)
         {
             if (directories[i].alias != ALIAS_PLACEHOLDER && directories[i].alias == alias) {
                 directories[i].alias = ALIAS_PLACEHOLDER;
@@ -76,7 +76,7 @@ public:
     {
         int index = -1, max_count = 0;
         filesystem::path p(token);
-        for (int i = 0; i < directories.size(); i++)
+        for (size_t i = 0; i < directories.size(); i++)
         {
             if (token == directories[i].alias)
             {
@@ -114,7 +114,7 @@ public:
     void remove_record_with_alias(wstring alias)
     {
         int pos = -1;
-        for (int i = 0; i < directories.size(); i++)
+        for (size_t i = 0; i < directories.size(); i++)
         {
             if (directories[i].alias == alias)
                 pos = i;
