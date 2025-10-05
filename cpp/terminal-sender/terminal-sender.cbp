@@ -13,7 +13,11 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="../InputSimulator" />
 				</Compiler>
+				<Linker>
+					<Add library="../InputSimulator/bin/Debug/libInputSimulator.a" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="../bin/Release/terminal-sender/terminal-sender" prefix_auto="1" extension_auto="1" />
@@ -22,9 +26,11 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O3" />
+					<Add directory="../InputSimulator" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="../InputSimulator/bin/Release/libInputSimulator.a" />
 				</Linker>
 			</Target>
 		</Build>
@@ -32,14 +38,12 @@
 			<Add option="-Wall" />
 			<Add option="-std=gnu++17" />
 			<Add option="-fexceptions" />
-			<Add directory="../InputSimulator" />
 		</Compiler>
 		<Linker>
 			<Add option="-static-libstdc++" />
 			<Add option="-static-libgcc" />
 			<Add option="-static" />
 			<Add option="-municode" />
-			<Add library="../InputSimulator/bin/Debug/libInputSimulator.a" />
 		</Linker>
 		<Unit filename="main.cpp" />
 		<Extensions />

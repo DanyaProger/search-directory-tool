@@ -27,7 +27,10 @@ int TerminalDirectoryChanger::get_delay()
     return this->delay;
 }
 
-wstring TerminalDirectoryChanger::path_to_cd_command(wstring path){}
+wstring TerminalDirectoryChanger::path_to_cd_command(wstring path)
+{
+    return L"";
+}
 
 void TerminalDirectoryChanger::change_directory(wstring path)
 {
@@ -39,7 +42,7 @@ void TerminalDirectoryChanger::change_directory(wstring path)
 
     wstring command = path_to_cd_command(path);
     wstring prepared_command;
-    for (int i = 0; i < command.size(); i++)
+    for (size_t i = 0; i < command.size(); i++)
         if (command[i] != L'\"')
             prepared_command.push_back(command[i]);
         else
@@ -136,7 +139,7 @@ void ExplorerDirectoryChanger::change_directory(wstring path)
 
     wstring command = path_to_cd_command(path);
     wstring prepared_command;
-    for (int i = 0; i < command.size(); i++)
+    for (size_t i = 0; i < command.size(); i++)
         if (command[i] != L'\"')
             prepared_command.push_back(command[i]);
         else

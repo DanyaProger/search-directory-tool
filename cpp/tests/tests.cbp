@@ -39,9 +39,9 @@
 				<Linker>
 					<Add option="-s" />
 					<Add option="-static -static-libgcc -static-libstdc++" />
-					<Add library="../InputSimulator/bin/Debug/libInputSimulator.a" />
-					<Add library="../DirectoryChangers/bin/Debug/libDirectoryChangers.a" />
-					<Add library="../RecordsDispatcher/bin/Debug/libRecordsDispatcher.a" />
+					<Add library="../InputSimulator/bin/Release/libInputSimulator.a" />
+					<Add library="../DirectoryChangers/bin/Release/libDirectoryChangers.a" />
+					<Add library="../RecordsDispatcher/bin/Release/libRecordsDispatcher.a" />
 				</Linker>
 			</Target>
 		</Build>
@@ -58,6 +58,7 @@
 		<Unit filename="src/BashTests.h" />
 		<Unit filename="src/CmdTests.h" />
 		<Unit filename="src/ExplorerTests.h" />
+		<Unit filename="src/FarTests.h" />
 		<Unit filename="src/PowerShellTests.h" />
 		<Unit filename="src/TotalCommanderTests.h" />
 		<Extensions />
