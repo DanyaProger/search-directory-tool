@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wxsmith>
+	<object class="wxFrame" name="search_directory_tool_wxFrame">
+		<centered>1</centered>
+		<id_arg>0</id_arg>
+		<handler function="OnClose" entry="EVT_CLOSE" />
+		<handler function="OnKeyDown" entry="EVT_KEY_DOWN" />
+		<handler function="OnLeftDown" entry="EVT_LEFT_DOWN" />
+		<object class="wxBoxSizer" variable="BoxSizer1" member="no">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<object class="wxBoxSizer" variable="BoxSizer2" member="no">
+					<object class="sizeritem">
+						<object class="wxStaticText" name="ID_STATICTEXTSD" variable="StaticTextSd" member="yes">
+							<label> sd </label>
+							<font>
+								<size>9</size>
+								<style>normal</style>
+								<weight>normal</weight>
+								<underlined>0</underlined>
+								<family>modern</family>
+								<face>Lucida Console</face>
+							</font>
+							<style>wxALIGN_LEFT|wxALIGN_CENTRE</style>
+						</object>
+						<flag>wxALIGN_CENTER_VERTICAL</flag>
+						<border>5</border>
+					</object>
+					<object class="sizeritem">
+						<object class="wxTextCtrl" name="ID_TEXTCTRLCOMMAND" variable="TextCtrlCommand" member="yes">
+							<size>400,-1</size>
+							<font>
+								<size>9</size>
+								<style>normal</style>
+								<weight>normal</weight>
+								<underlined>0</underlined>
+								<family>modern</family>
+								<face>Lucida Console</face>
+							</font>
+							<style>wxTE_RICH|wxBORDER_NONE</style>
+							<handler function="OnTextCtrlCommandText" entry="EVT_TEXT" />
+						</object>
+						<flag>wxALIGN_LEFT</flag>
+						<border>5</border>
+						<option>5</option>
+					</object>
+				</object>
+				<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+				<border>5</border>
+			</object>
+			<object class="sizeritem">
+				<object class="wxStaticText" name="ID_STATICTEXTPLACEHOLDER1" variable="StaticTextPlaceholder1" member="yes">
+					<label></label>
+					<size>-1,10</size>
+				</object>
+				<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+			</object>
+			<object class="sizeritem">
+				<object class="wxStaticText" name="ID_STATICTEXTPATHESLABEL" variable="StaticTextPathesLabel" member="yes">
+					<label>Pathes:</label>
+					<font>
+						<size>8</size>
+						<style>normal</style>
+						<weight>normal</weight>
+						<underlined>0</underlined>
+						<family>modern</family>
+						<face>Lucida Console</face>
+					</font>
+				</object>
+				<flag>wxALL|wxALIGN_LEFT</flag>
+				<border>5</border>
+			</object>
+			<object class="sizeritem">
+				<object class="wxTextCtrl" name="ID_TEXTCTRLPATHES" variable="TextCtrlPathes" member="yes">
+					<size>-1,400</size>
+					<font>
+						<size>8</size>
+						<style>normal</style>
+						<weight>normal</weight>
+						<underlined>0</underlined>
+						<family>modern</family>
+						<face>Lucida Console</face>
+					</font>
+					<style>wxTE_PROCESS_ENTER|wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH|wxTE_NOHIDESEL|wxBORDER_NONE</style>
+				</object>
+				<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND</flag>
+				<border>5</border>
+				<option>10</option>
+			</object>
+		</object>
+	</object>
+</wxsmith>
