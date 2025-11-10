@@ -18,6 +18,7 @@ IMPLEMENT_APP(search_directory_tool_wxApp);
 
 bool search_directory_tool_wxApp::OnInit()
 {
+    defaultLocale.Init();
     //(*AppInitialize
     bool wxsOK = true;
     wxInitAllImageHandlers();

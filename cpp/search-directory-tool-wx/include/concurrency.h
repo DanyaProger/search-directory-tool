@@ -1,7 +1,8 @@
 #ifndef CONCURRENCY_H_INCLUDED
 #define CONCURRENCY_H_INCLUDED
 
-#include <vector>
+#include <queue>
+#include <utility>
 #include <wx/string.h>
 #include <wx/thread.h>
 
@@ -56,6 +57,8 @@ public:
     }
 };
 
+enum class PercentageType {Alias, Relative, Absolute};
+
 class PathesExchange
 {
 public:
@@ -72,7 +75,8 @@ public:
         }
     };
 
-    static vector<Path> pathes;
+    static queue<Path> pathes;
+    static queue<pair<PercentageType, int>> percentages;
     static long long version;
     static wxCriticalSection pathesExchangeCS;
 
@@ -81,7 +85,7 @@ public:
         wxCriticalSectionLocker enter(pathesExchangeCS);
         if (version == PathesExchange::version)
         {
-            pathes.push_back(path);
+            pathes.push(path);
         }
     }
 
@@ -94,15 +98,48 @@ public:
     static void clearPathes()
     {
         wxCriticalSectionLocker enter(pathesExchangeCS);
-        pathes.clear();
+        while (!pathes.empty()) pathes.pop();
     }
 
-    static vector<Path> popPathes()
+    static bool popPath(Path& inFront)
     {
         wxCriticalSectionLocker enter(pathesExchangeCS);
-        vector<Path> result = pathes;
-        pathes.clear();
-        return result;
+        if (!pathes.empty())
+        {
+            inFront = pathes.front();
+            pathes.pop();
+            return true;
+        }
+        else
+            return false;
+    }
+
+    static void pushPercentage(long long version, pair<PercentageType, int> percentage)
+    {
+        wxCriticalSectionLocker enter(pathesExchangeCS);
+        if (version == PathesExchange::version)
+        {
+            percentages.push(percentage);
+        }
+    }
+
+    static bool popPercentage(pair<PercentageType, int>& percentage)
+    {
+        wxCriticalSectionLocker enter(pathesExchangeCS);
+        if (!percentages.empty())
+        {
+            percentage = percentages.front();
+            percentages.pop();
+            return true;
+        }
+        else
+            return false;
+    }
+
+    static void clearPercentages()
+    {
+        wxCriticalSectionLocker enter(pathesExchangeCS);
+        while (!percentages.empty()) percentages.pop();
     }
 };
 

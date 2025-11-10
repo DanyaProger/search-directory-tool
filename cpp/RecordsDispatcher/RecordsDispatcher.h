@@ -111,6 +111,24 @@ public:
         return L"";
     }
 
+    bool get_path_with_alias(wstring alias, wstring& path)
+    {
+        int pos = -1;
+        for (size_t i = 0; i < directories.size(); i++)
+            if (directories[i].alias == alias)
+                pos = i;
+        if (pos != -1)
+        {
+            path = directories[pos].full_path;
+            return true;
+        }
+        else
+        {
+            path = L"";
+            return false;
+        }
+    }
+
     void remove_record_with_alias(wstring alias)
     {
         int pos = -1;

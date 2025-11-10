@@ -6,6 +6,7 @@ wxCriticalSection SdTokenExchange::sdTokenExchangeCS = wxCriticalSection();
 double SdTokenExchange::DEFAULT_TIME = 3;
 double SdTokenExchange::time = SdTokenExchange::DEFAULT_TIME;
 
-vector<PathesExchange::Path> PathesExchange::pathes = vector<PathesExchange::Path>();
+queue<PathesExchange::Path> PathesExchange::pathes = queue<PathesExchange::Path>();
+queue<pair<PercentageType, int>> PathesExchange::percentages = queue<pair<PercentageType, int>>();
 long long PathesExchange::version = -1;
 wxCriticalSection PathesExchange::pathesExchangeCS = wxCriticalSection();

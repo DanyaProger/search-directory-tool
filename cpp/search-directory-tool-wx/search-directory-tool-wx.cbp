@@ -14,22 +14,24 @@
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-g" />
-					<Add directory="$(#wx)/lib/gcc_lib/mswu" />
+					<Add directory="$(#wx)/lib/gcc_lib/mswud" />
+					<Add directory="../RecordsDispatcher" />
 				</Compiler>
 				<ResourceCompiler>
-					<Add directory="$(#wx)/lib/gcc_lib/mswu" />
+					<Add directory="$(#wx)/lib/gcc_lib/mswud" />
 				</ResourceCompiler>
 				<Linker>
-					<Add library="libwxmsw33u.a" />
-					<Add library="libwxpng.a" />
-					<Add library="libwxjpeg.a" />
-					<Add library="libwxtiff.a" />
-					<Add library="libwxzlib.a" />
-					<Add library="libwxregexu.a" />
-					<Add library="libwxscintilla.a" />
-					<Add library="libwxexpat.a" />
-					<Add library="libwxlexilla.a" />
-					<Add library="libwxwebp.a" />
+					<Add library="libwxmsw33ud.a" />
+					<Add library="libwxpngd.a" />
+					<Add library="libwxjpegd.a" />
+					<Add library="libwxtiffd.a" />
+					<Add library="libwxzlibd.a" />
+					<Add library="libwxregexud.a" />
+					<Add library="libwxscintillad.a" />
+					<Add library="libwxexpatd.a" />
+					<Add library="libwxlexillad.a" />
+					<Add library="libwxwebpd.a" />
+					<Add library="../RecordsDispatcher/bin/Debug/libRecordsDispatcher.a" />
 					<Add directory="$(#wx)/lib/gcc_lib" />
 				</Linker>
 			</Target>
@@ -40,8 +42,9 @@
 				<Option compiler="gcc" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add directory="$(#wx)/lib/gcc_lib/mswu" />
+					<Add directory="../RecordsDispatcher" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="$(#wx)/lib/gcc_lib/mswu" />
@@ -58,6 +61,7 @@
 					<Add library="libwxexpat.a" />
 					<Add library="libwxlexilla.a" />
 					<Add library="libwxwebp.a" />
+					<Add library="../RecordsDispatcher/bin/Release/libRecordsDispatcher.a" />
 					<Add directory="$(#wx)/lib/gcc_lib" />
 				</Linker>
 			</Target>
