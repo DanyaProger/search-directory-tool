@@ -91,7 +91,7 @@
 					</object>
 					<object class="sizeritem">
 						<object class="wxStaticText" name="ID_STATICTEXTALIASPERCENTAGE" variable="StaticTextAliasPercentage" member="yes">
-							<label>    </label>
+							<label></label>
 							<font>
 								<size>8</size>
 								<style>normal</style>
@@ -124,7 +124,7 @@
 					</object>
 					<object class="sizeritem">
 						<object class="wxStaticText" name="ID_STATICTEXTRELPERCENTAGE" variable="StaticTextRelPercentage" member="yes">
-							<label>    </label>
+							<label></label>
 							<font>
 								<size>8</size>
 								<style>normal</style>
@@ -157,7 +157,7 @@
 					</object>
 					<object class="sizeritem">
 						<object class="wxStaticText" name="ID_STATICTEXTABSPERCENTAGE" variable="StaticTextAbsPercentage" member="yes">
-							<label>    </label>
+							<label></label>
 							<size>-1,-1</size>
 							<font>
 								<size>8</size>

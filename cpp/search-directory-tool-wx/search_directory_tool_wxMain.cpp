@@ -66,7 +66,7 @@ search_directory_tool_wxFrame::search_directory_tool_wxFrame(wxWindow* parent,wx
     wxFont StaticTextAliasFont(8,wxFONTFAMILY_MODERN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Lucida Console"),wxFONTENCODING_DEFAULT);
     StaticTextAlias->SetFont(StaticTextAliasFont);
     BoxSizer3->Add(StaticTextAlias, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    StaticTextAliasPercentage = new wxStaticText(this, ID_STATICTEXTALIASPERCENTAGE, _T("    "), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxALIGN_RIGHT, _T("ID_STATICTEXTALIASPERCENTAGE"));
+    StaticTextAliasPercentage = new wxStaticText(this, ID_STATICTEXTALIASPERCENTAGE, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxALIGN_RIGHT, _T("ID_STATICTEXTALIASPERCENTAGE"));
     wxFont StaticTextAliasPercentageFont(8,wxFONTFAMILY_MODERN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Lucida Console"),wxFONTENCODING_DEFAULT);
     StaticTextAliasPercentage->SetFont(StaticTextAliasPercentageFont);
     BoxSizer3->Add(StaticTextAliasPercentage, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
@@ -74,7 +74,7 @@ search_directory_tool_wxFrame::search_directory_tool_wxFrame(wxWindow* parent,wx
     wxFont StaticTextRelFont(8,wxFONTFAMILY_MODERN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Lucida Console"),wxFONTENCODING_DEFAULT);
     StaticTextRel->SetFont(StaticTextRelFont);
     BoxSizer3->Add(StaticTextRel, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    StaticTextRelPercentage = new wxStaticText(this, ID_STATICTEXTRELPERCENTAGE, _T("    "), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxALIGN_RIGHT, _T("ID_STATICTEXTRELPERCENTAGE"));
+    StaticTextRelPercentage = new wxStaticText(this, ID_STATICTEXTRELPERCENTAGE, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE|wxALIGN_RIGHT, _T("ID_STATICTEXTRELPERCENTAGE"));
     wxFont StaticTextRelPercentageFont(8,wxFONTFAMILY_MODERN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Lucida Console"),wxFONTENCODING_DEFAULT);
     StaticTextRelPercentage->SetFont(StaticTextRelPercentageFont);
     BoxSizer3->Add(StaticTextRelPercentage, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
@@ -82,7 +82,7 @@ search_directory_tool_wxFrame::search_directory_tool_wxFrame(wxWindow* parent,wx
     wxFont StaticTextAbsFont(8,wxFONTFAMILY_MODERN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Lucida Console"),wxFONTENCODING_DEFAULT);
     StaticTextAbs->SetFont(StaticTextAbsFont);
     BoxSizer3->Add(StaticTextAbs, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    StaticTextAbsPercentage = new wxStaticText(this, ID_STATICTEXTABSPERCENTAGE, _T("    "), wxDefaultPosition, wxSize(-1,-1), wxST_NO_AUTORESIZE, _T("ID_STATICTEXTABSPERCENTAGE"));
+    StaticTextAbsPercentage = new wxStaticText(this, ID_STATICTEXTABSPERCENTAGE, wxEmptyString, wxDefaultPosition, wxSize(-1,-1), wxST_NO_AUTORESIZE, _T("ID_STATICTEXTABSPERCENTAGE"));
     wxFont StaticTextAbsPercentageFont(8,wxFONTFAMILY_MODERN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Lucida Console"),wxFONTENCODING_DEFAULT);
     StaticTextAbsPercentage->SetFont(StaticTextAbsPercentageFont);
     BoxSizer3->Add(StaticTextAbsPercentage, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
@@ -293,7 +293,7 @@ bool fileNameMatch(wxString& fileName, int iToken, vector<wxString>& tokens, vec
     }
 }
 
-DfsMatchExitCode search_directory_tool_wxFrame::dfsMatch(int iToken, vector<wxString>& tokens, vector<SdTokenType>& tokensTypes, wxString& currentPath, bool isSearch, bool isDir, clock_t& lastTime, long long &version, wxString& sdToken, double& time)
+/*DfsMatchExitCode search_directory_tool_wxFrame::dfsMatch(int iToken, vector<wxString>& tokens, vector<SdTokenType>& tokensTypes, wxString& currentPath, bool isSearch, bool isDir, clock_t& lastTime, long long &version, wxString& sdToken, double& time)
 {
     if (iToken == (int)tokens.size())
     {
@@ -386,7 +386,7 @@ DfsMatchExitCode search_directory_tool_wxFrame::dfsMatch(int iToken, vector<wxSt
     }
 
     return DfsMatchExitCode::Success;
-}
+}*/
 
 bool shiftMatch(wxString& currentPathLower, long iLastProcessedCurrentPathChar,
                 vector<wxString>& tokens, vector<SdTokenType>& tokensTypes,
@@ -505,10 +505,9 @@ bool shiftMatch(wxString& currentPathLower, long iLastProcessedCurrentPathChar,
     return true;
 }
 
-DfsMatchExitCode search_directory_tool_wxFrame::dfsMatch2(wxString& currentPath, wxString& currentPathLower, long iLastProcessedCurrentPathChar,
-                                                          vector<wxString>&tokens, vector<SdTokenType>& tokensTypes,
-                                                          int iFirstTokenOfSlashOrSubstringSuffix, int iFirstNotMatchedToken, int& iFirstToken,
-                                                          bool isSearch, bool isDir,
+/*DfsMatchExitCode search_directory_tool_wxFrame::dfsMatch3(wxString& currentPath, wxString& lowerSuffixPath,
+                                                          vector<wxString>&tokens, vector<SdTokenType>& tokensTypes, vector<vector<size_t>>& subStringPrefixFunctions,
+                                                          bool isDir,
                                                           clock_t lastTime, double percentageStart, double percentageEnd, PercentageType& pType,
                                                           long long& version, wxString& sdToken, double& time)
 {
@@ -517,17 +516,14 @@ DfsMatchExitCode search_directory_tool_wxFrame::dfsMatch2(wxString& currentPath,
     if (SdTokenExchange::updateWorker(version, sdToken, time))
         return DfsMatchExitCode::Update;
 
-    long newILastProcessedCurrentPathChar = iLastProcessedCurrentPathChar;
-    int newIFirstTokenOfSlashOrSubstringSuffix = iFirstTokenOfSlashOrSubstringSuffix;
-    int newIFirstNotMatchedToken = iFirstNotMatchedToken;
-    bool newIsSearch = isSearch;
-    bool match = true;
-    bool isRoot = currentPath.Length() - 1 == iLastProcessedCurrentPathChar;
-    if (!isRoot)
-        match = shiftMatch(currentPathLower, iLastProcessedCurrentPathChar, tokens, tokensTypes, iFirstTokenOfSlashOrSubstringSuffix, iFirstNotMatchedToken, iFirstToken, isSearch,
-               newILastProcessedCurrentPathChar, newIFirstTokenOfSlashOrSubstringSuffix, newIFirstNotMatchedToken, newIsSearch);
-    if (match)
+    int matchResult;
+    matchResult = match(lowerSuffixPath, tokens, tokensTypes, subStringsPrefixFunctions, isDir);
+    if (matchResult != MATCH_MISS)
     {
+        if (matchResult == MATCH_SUCCEED)
+        {
+
+        }
         if (newILastProcessedCurrentPathChar == currentPath.Length() - 1 && newIFirstNotMatchedToken == tokens.size() ||
             (isRoot && ((tokens.size() == iFirstNotMatchedToken + 1 && tokensTypes[iFirstNotMatchedToken] == SdTokenType::Asterisk) ||
                         (tokens.size() == iFirstNotMatchedToken + 2 && tokensTypes[iFirstNotMatchedToken] == SdTokenType::Slash && tokensTypes[iFirstNotMatchedToken + 1] == SdTokenType::Asterisk))))
@@ -595,7 +591,7 @@ DfsMatchExitCode search_directory_tool_wxFrame::dfsMatch2(wxString& currentPath,
     }
 
     return DfsMatchExitCode::Success;
-}
+}*/
 
 wxThread::ExitCode search_directory_tool_wxFrame::Entry()
 {
@@ -608,9 +604,10 @@ wxThread::ExitCode search_directory_tool_wxFrame::Entry()
     clock_t lastTime;
     wxString currentPath;
     wxString currentPathLower;
-    int iFirstToken;
     PercentageType pType;
-    DfsMatchExitCode exitCode;
+    SearchExitCode exitCode = SearchExitCode::Success;
+    BfsSearcher bfsSearcher;
+    Searcher* searcher = &bfsSearcher;
 
     bool isUpdated = false;
 
@@ -634,16 +631,20 @@ wxThread::ExitCode search_directory_tool_wxFrame::Entry()
         if (GetThread()->TestDestroy())
             return nullptr;
 
-        splitOnTokens(sdToken, tokens, tokensTypes);
-
-        if (tokens.size() > 0 && tokensTypes[0] == SdTokenType::SubString)
+        if (true)
         {
             wxString dirsPath = exePath.BeforeLast('\\');
             dirsPath.Append("\\dirs.txt");
             RecordsDispatcher dirs(dirsPath.ToStdWstring());
             dirs.load_dirs();
             wstring dir;
-            bool isAlias = dirs.get_path_with_alias(tokens[0].ToStdWstring(), dir);
+            long long iFirstNotAliasChar = 0;
+            while (sdToken.Length() > iFirstNotAliasChar &&
+                   sdToken.GetChar(iFirstNotAliasChar) != '*' &&
+                   sdToken.GetChar(iFirstNotAliasChar) != '\\' &&
+                   sdToken.GetChar(iFirstNotAliasChar) != '/')
+                    iFirstNotAliasChar++;
+            bool isAlias = dirs.get_path_with_alias(sdToken.SubString(0, iFirstNotAliasChar - 1).ToStdWstring(), dir);
             dirs.save_dirs();
             if (isAlias)
             {
@@ -654,15 +655,16 @@ wxThread::ExitCode search_directory_tool_wxFrame::Entry()
                     dir.pop_back();
                 }
                 currentPath = dir;
-                currentPathLower = currentPath.Lower();
+                //findFileDuration = 0;
                 lastTime = clock();
-                iFirstToken = 1;
                 PathesExchange::pushPercentage(version, make_pair(PercentageType::Alias, 0));
                 pType = PercentageType::Alias;
-                exitCode = dfsMatch2(currentPath, currentPathLower, currentPath.Length() - 1, tokens, tokensTypes, -1, iFirstToken, iFirstToken, false, true, lastTime, 0, 100, pType, version, sdToken, time);
-                if (exitCode == DfsMatchExitCode::Delete)
+
+                //exitCode = dfsMatch2(currentPath, currentPathLower, currentPath.Length() - 1, tokens, tokensTypes, -1, iFirstToken, iFirstToken, false, true, lastTime, 0, 100, pType, version, sdToken, time);
+                exitCode = searcher->search(currentPath, sdToken.SubString(iFirstNotAliasChar, sdToken.Length() - 1), pType, this, version, sdToken, time);
+                if (exitCode == SearchExitCode::Delete)
                     break;
-                if (exitCode == DfsMatchExitCode::Update)
+                if (exitCode == SearchExitCode::Update)
                 {
                     isUpdated = true;
                     continue;
@@ -674,36 +676,35 @@ wxThread::ExitCode search_directory_tool_wxFrame::Entry()
         currentPathLower = currentPath.Lower();
 
         lastTime = clock();
-        iFirstToken = 0;
 
         //dfsMatch(0, tokens, tokensTypes, currentPath, false, true, lastTime, version, sdToken, time);
         PathesExchange::pushPercentage(version, make_pair(PercentageType::Relative, 0));
         pType = PercentageType::Relative;
-        exitCode = dfsMatch2(currentPath, currentPathLower, currentPath.Length() - 1, tokens, tokensTypes, -1, iFirstToken, iFirstToken, false, true, lastTime, 0, 100, pType, version, sdToken, time);
-        if (exitCode == DfsMatchExitCode::Delete)
+        //exitCode = dfsMatch2(currentPath, currentPathLower, currentPath.Length() - 1, tokens, tokensTypes, -1, iFirstToken, iFirstToken, false, true, lastTime, 0, 100, pType, version, sdToken, time);
+        exitCode = searcher->search(currentPath, sdToken, pType, this, version, sdToken, time);
+        if (exitCode == SearchExitCode::Delete)
             break;
-        if (exitCode == DfsMatchExitCode::Update)
+        if (exitCode == SearchExitCode::Update)
         {
             isUpdated = true;
             continue;
         }
 
-        wregex re2(L"[A-Za-z]:");
+        wregex re2(L"[A-Za-z]:[\\\\/]");
         wsmatch m2;
-        if (tokens.size() >= 2 && regex_match(tokens[0].ToStdWstring(), m2, re2) && tokensTypes[1] == SdTokenType::Slash)
+        if (sdToken.Length() >= 3 && regex_match(sdToken.SubString(0, 2).ToStdWstring(), m2, re2))
         {
-            currentPath = tokens[0];
-            currentPathLower = currentPath.Lower();
+            currentPath = sdToken.SubString(0, 1);
 
             lastTime = clock();
-            iFirstToken = 1;
 
             PathesExchange::pushPercentage(version, make_pair(PercentageType::Absolute, 0));
             pType = PercentageType::Absolute;
-            exitCode = dfsMatch2(currentPath, currentPathLower, currentPath.Length() - 1, tokens, tokensTypes, -1, iFirstToken, iFirstToken, false, true, lastTime, 0, 100, pType, version, sdToken, time);
-            if (exitCode == DfsMatchExitCode::Delete)
+            //exitCode = dfsMatch2(currentPath, currentPathLower, currentPath.Length() - 1, tokens, tokensTypes, -1, iFirstToken, iFirstToken, false, true, lastTime, 0, 100, pType, version, sdToken, time);
+            exitCode = searcher->search(currentPath, sdToken, pType, this, version, sdToken, time);
+            if (exitCode == SearchExitCode::Delete)
                 break;
-            if (exitCode == DfsMatchExitCode::Update)
+            if (exitCode == SearchExitCode::Update)
             {
                 isUpdated = true;
                 continue;
@@ -1023,6 +1024,12 @@ void search_directory_tool_wxFrame::OnTimer1Trigger(wxTimerEvent& event)
     wxTextAttr underlinedStyle = defaultStyle;
     underlinedStyle.SetFont(underlinedFont);
 
+    wxFont dirFont = TextCtrlPathes->GetFont();
+    dirFont.SetStyle(wxFONTSTYLE_ITALIC);
+    dirFont.SetUnderlined(true);
+    wxTextAttr dirStyle = defaultStyle;
+    dirStyle.SetFont(dirFont);
+
     while (clock() - st < TIME_ON_OnTimer1Trigger && PathesExchange::popPath(path))
     {
         if (isFirstInPathes)
@@ -1035,13 +1042,17 @@ void search_directory_tool_wxFrame::OnTimer1Trigger(wxTimerEvent& event)
         {
             size_t pos = path.fullPath.Last('\\');
             TextCtrlPathes->AppendText(path.fullPath.SubString(0, pos));
-            TextCtrlPathes->SetDefaultStyle(underlinedStyle);
+            TextCtrlPathes->SetDefaultStyle(dirStyle);
             TextCtrlPathes->AppendText(path.fullPath.SubString(pos + 1, path.fullPath.Length() - 1));
             TextCtrlPathes->SetDefaultStyle(defaultStyle);
         }
         else
         {
-            TextCtrlPathes->AppendText(path.fullPath);
+            size_t pos = path.fullPath.Last('\\');
+            TextCtrlPathes->AppendText(path.fullPath.SubString(0, pos));
+            TextCtrlPathes->SetDefaultStyle(underlinedStyle);
+            TextCtrlPathes->AppendText(path.fullPath.SubString(pos + 1, path.fullPath.Length() - 1));
+            TextCtrlPathes->SetDefaultStyle(defaultStyle);
         }
         pathesCount += 1;
         if (pathesCount == MAX_PATHES_COUNT)

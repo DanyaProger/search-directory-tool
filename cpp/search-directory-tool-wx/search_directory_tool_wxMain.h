@@ -28,10 +28,8 @@
 
 #include "include/concurrency.h"
 #include "include/cmdline.h"
+#include "include/search.h"
 #include "RecordsDispatcher.h"
-
-enum class SdTokenType {Slash, Asterisk, SubString};
-enum class DfsMatchExitCode {Success, Delete, Update};
 
 class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
 {
@@ -66,13 +64,13 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         wxThread::ExitCode Entry();
         void splitOnTokens(wxString sdToken, vector<wxString>& tokens, vector<SdTokenType>& tokensTypes);
         void setPercentage(pair<PercentageType, int> percentage);
-        DfsMatchExitCode dfsMatch(int iToken, vector<wxString>& tokens, vector<SdTokenType>& tokensTypes, wxString& currentPath, bool isSearch, bool isDir, clock_t& lastTime, long long &version, wxString& sdToken, double& time);
-        DfsMatchExitCode dfsMatch2(wxString& currentPath, wxString& currentPathLower, long iLastProcessedCurrentPathChar,
-                                   vector<wxString>&tokens, vector<SdTokenType>& tokensTypes,
-                                   int iFirstTokenOfSlashOrSubstringSuffix, int iFirstNotMatchedToken, int& iFirstToken,
-                                   bool isSearch, bool isDir,
-                                   clock_t lastTime, double percentageStart, double percentageEnd, PercentageType& pType,
-                                   long long& version, wxString& sdToken, double& time);
+        //DfsMatchExitCode dfsMatch(int iToken, vector<wxString>& tokens, vector<SdTokenType>& tokensTypes, wxString& currentPath, bool isSearch, bool isDir, clock_t& lastTime, long long &version, wxString& sdToken, double& time);
+        //DfsMatchExitCode dfsMatch3(wxString& currentPath, wxString& currentPathLower,
+        //                           vector<wxString>&tokens, vector<SdTokenType>& tokensTypes,
+        //                           int iFirstTokenOfSlashOrSubstringSuffix, int iFirstNotMatchedToken, int& iFirstToken,
+        //                           bool isSearch, bool isDir,
+        //                           clock_t lastTime, double percentageStart, double percentageEnd, PercentageType& pType,
+        //                           long long& version, wxString& sdToken, double& time);
 
         //(*Identifiers(search_directory_tool_wxFrame)
         static const wxWindowID ID_STATICTEXTSD;
@@ -104,6 +102,7 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         wxTimer Timer1;
         //*)
 
+        int MATCH_MISS = 0, MATCH_SUCCEED = 1, MATCH_POSSIBLE = 2;
         int selectedRow = -1;
         long long exchangeVersion = -1;
         long long messagesCount = 0;
@@ -114,6 +113,7 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         bool isFirstInPathes = true;
         CmdLineParser cmdLineParser = CmdLineParser(vector<CmdLineFlag>(), {CmdLineOption(true, "t", true, "time")});
         int aliasPercentage, relativePercentage, absolutePercentage;
+        clock_t findFileDuration = 0;
 
     public:
 
