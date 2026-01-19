@@ -5,9 +5,13 @@
 #include <wx/thread.h>
 #include <vector>
 #include <queue>
+#include <string>
 #include <windows.h>
 
 #include "concurrency.h"
+#include "search_tree.h"
+
+using namespace std;
 
 enum class SdTokenType {Slash, Asterisk, SubString};
 enum class SearchExitCode {Success, Delete, Update, TimeLimit};
@@ -33,9 +37,9 @@ protected:
     };
 
     enum class LinkedSequenceType {DoubleAsterisk, LinkedSequence};
-    enum class TokenSequenceType {StringDelimeterSequence, AsteriskSequence};
+    enum class TokenSequenceType {Delimeter, FileNameSequence};
     enum class TokenType {Asterisk, String};
-    enum class LineSequenceType {StringDelimeterSequence, AsteriskSequence, DoubleAsterisk};
+    enum class LineSequenceType {Delimeter, FileNameSequence, DoubleAsterisk};
 
     class TokenSequence
     {
@@ -70,15 +74,9 @@ protected:
     vector<LinkedSequenceType> linkedSequencesTypes;
     bool isAppendSlash = false;
 
-    //long long iFirstMatchedChar;
-    long long iLastMatchedChar;
-    long long lastPrefixFunction;
-    long long iLastPrefixFunctionProcessedChar;
-    queue<long long> prefixFunctionMaximums;
-    bool isFirstStringDelimeterSequence;
-    TokenSequence stringDelimeterSequenceIsFirst;
+    FileTree fileTree;
 
-    void onSuccessMatch(wxString& currentPath, bool& isDir)
+    void onSuccessMatch(wxString& currentPath, bool isDir)
     {
         PathesExchange::pushPath(version, PathesExchange::Path(currentPath, isDir, false));
     }
@@ -98,7 +96,7 @@ protected:
         return SdTokenExchange::updateWorker(version, sdToken, time);
     }
 
-    LineTokenSequence parseAsteriskSequence(wxString str)
+    LineTokenSequence parseFileNameSequence(wxString str)
     {
         LineTokenSequence sequence;
         for (int i = 0; i < str.Length(); i++)
@@ -133,11 +131,6 @@ protected:
 
         return prefixFunction;
     }
-
-    /*vector<long long> KMP(wxString str, wxString& sample, vector<long long>& samplePrefixFunction)
-    {
-
-    }*/
 
     long long calcPrefixFunction(long long pf, wxUniChar ch, wxString str, vector<long long> prefixFunction)
     {
@@ -176,6 +169,7 @@ protected:
     void parseExpression(wxString expression)
     {
         expression.Replace("/", "\\");
+        expression.MakeLower();
 
         vector<int> processed(expression.Length(), -1);
         vector<LineTokenSequence> seqs;
@@ -210,41 +204,33 @@ protected:
         }
 
         for (int i = 0; i < expression.Length(); i++)
-            if (processed[i] == -1)
+            if (expression.GetChar(i) == '\\')
             {
-                if (expression.GetChar(i) == '*')
-                {
-                    int l = i, r = i;
-                    while (l > 0 && processed[l - 1] == -1 && expression.GetChar(l - 1) != '\\')
-                        l--;
-                    while (r < (long long)expression.Length() - 1 && processed[r + 1] == -1 && expression.GetChar(r + 1) != '\\')
-                        r++;
+                iSequence++;
+                types.push_back(LineSequenceType::Delimeter);
+                LineTokenSequence seq;
+                seq.tokens.push_back("\\");
+                seq.tokensTypes.push_back(TokenType::String);
+                seqs.push_back(seq);
 
-                    iSequence++;
-                    types.push_back(LineSequenceType::AsteriskSequence);
-                    seqs.push_back(parseAsteriskSequence(expression.SubString(l, r)));
-
-                    for (int j = l; j <= r; j++)
-                        processed[j] = iSequence;
-                }
+                processed[i] = iSequence;
             }
 
         for (int i = 0; i < expression.Length(); i++)
             if (processed[i] == -1)
             {
-                int j = i;
-                while (j < (long long)expression.Length() - 1 && processed[j + 1] == -1)
-                    j++;
+                int l = i, r = i;
+                while (l > 0 && processed[l - 1] == -1 && expression.GetChar(l - 1) != '\\')
+                    l--;
+                while (r < (long long)expression.Length() - 1 && processed[r + 1] == -1 && expression.GetChar(r + 1) != '\\')
+                    r++;
 
                 iSequence++;
-                types.push_back(LineSequenceType::StringDelimeterSequence);
-                LineTokenSequence seq;
-                seq.tokens.push_back(expression.SubString(i, j));
-                seq.tokensTypes.push_back(TokenType::String);
-                seqs.push_back(seq);
+                types.push_back(LineSequenceType::FileNameSequence);
+                seqs.push_back(parseFileNameSequence(expression.SubString(l, r)));
 
-                for (int k = i; k <= j; k++)
-                    processed[k] = iSequence;
+                for (int j = l; j <= r; j++)
+                    processed[j] = iSequence;
             }
 
         for (int i = 0; i < processed.size(); i++)
@@ -255,7 +241,7 @@ protected:
                 linkedSequencesTypes.push_back(LinkedSequenceType::DoubleAsterisk);
                 linkedSequences.push_back(LinkedSequence());
             }
-            else if (types[iSequence] == LineSequenceType::AsteriskSequence)
+            else if (types[iSequence] == LineSequenceType::FileNameSequence)
             {
                 if (linkedSequencesTypes.size() == 0 || linkedSequencesTypes.back() == LinkedSequenceType::DoubleAsterisk)
                 {
@@ -266,7 +252,7 @@ protected:
                 ts.tokens = seqs[iSequence].tokens;
                 ts.tokensTypes = seqs[iSequence].tokensTypes;
                 linkedSequences.back().sequences.push_back(ts);
-                linkedSequences.back().sequencesTypes.push_back(TokenSequenceType::AsteriskSequence);
+                linkedSequences.back().sequencesTypes.push_back(TokenSequenceType::FileNameSequence);
             }
             else // StringDelimeterSequence
             {
@@ -279,7 +265,7 @@ protected:
                 ts.tokens = seqs[iSequence].tokens;
                 ts.tokensTypes = seqs[iSequence].tokensTypes;
                 linkedSequences.back().sequences.push_back(ts);
-                linkedSequences.back().sequencesTypes.push_back(TokenSequenceType::StringDelimeterSequence);
+                linkedSequences.back().sequencesTypes.push_back(TokenSequenceType::Delimeter);
             }
 
             int j = i;
@@ -290,28 +276,18 @@ protected:
 
         isAppendSlash = false;
         if (linkedSequencesTypes.size() > 0 && linkedSequencesTypes.back() == LinkedSequenceType::LinkedSequence &&
-            linkedSequences.back().sequencesTypes.back() == TokenSequenceType::StringDelimeterSequence)
+            linkedSequences.back().sequencesTypes.back() == TokenSequenceType::Delimeter)
         {
-            wxString token = linkedSequences.back().sequences.back().tokens[0];
-            if (token.GetChar((long long)token.Length() - 1) == '\\')
+            isAppendSlash = true;
+
+            linkedSequences.back().sequences.pop_back();
+            linkedSequences.back().sequencesTypes.pop_back();
+            if (linkedSequences.back().sequences.size() == 0)
             {
-                token.RemoveLast(1);
-                isAppendSlash = true;
-                linkedSequences.back().sequences.back().tokens[0] = token;
-                if (token.Length() == 0)
-                {
-                    linkedSequences.back().sequences.pop_back();
-                    linkedSequences.back().sequencesTypes.pop_back();
-                    if (linkedSequences.back().sequences.size() == 0)
-                    {
-                        linkedSequences.pop_back();
-                        linkedSequencesTypes.pop_back();
-                    }
-                }
+                linkedSequences.pop_back();
+                linkedSequencesTypes.pop_back();
             }
         }
-
-
 
         calcPrefixFunctions();
     }
@@ -342,9 +318,10 @@ protected:
 
         int sz;
         HANDLE h = FindFirstFileW((currentPath + "\\*").c_str(), &ffd);
-
         if (h == INVALID_HANDLE_VALUE)
+        {
             return;
+        }
         do {
             wxString fileName(ffd.cFileName);
             if (fileName == "." || fileName == "..")
@@ -360,65 +337,33 @@ protected:
             pathes.push_back(path);
         } while (FindNextFileW(h, &ffd) != 0);
         FindClose(h);
+
         return;
     }
 
-    void matchSequenceReset(long long& iLastProcessedChar, TokenSequence sequence, TokenSequenceType sequenceType)
+    bool matchSeq(long long currentNodeId, long long& currentNodeLastMatchedChar, TokenSequence& sequence, TokenSequenceType& sequenceType, bool isLast, bool hasNextInLinkedSequence)
     {
-        iLastMatchedChar = iLastProcessedChar;
-        if (sequenceType == TokenSequenceType::StringDelimeterSequence)
-        {
-            lastPrefixFunction = 0;
-            while (!prefixFunctionMaximums.empty())
-                prefixFunctionMaximums.pop();
-            iLastPrefixFunctionProcessedChar = iLastProcessedChar;
-            isFirstStringDelimeterSequence = true;
-            stringDelimeterSequenceIsFirst = sequence;
-        }
-        else
-            isFirstStringDelimeterSequence = false;
-    }
-
-    bool matchSeq(wxString& lowerPath, TokenSequence& sequence, TokenSequenceType& sequenceType, long long& iLastProcessedChar, bool isLast, bool hasNextInLinkedSequence, bool& isFullCoverage)
-    {
-        isFullCoverage = false;
-        if (sequenceType == TokenSequenceType::StringDelimeterSequence)
+        if (sequenceType == TokenSequenceType::Delimeter)
         {
             bool isMatch = true;
-            if (iLastProcessedChar + (long long)sequence.tokens[0].Length() < (long long)lowerPath.Length())
+            if (currentNodeLastMatchedChar + 1 < fileTree.getNodeLength(currentNodeId))
             {
-                for (int i = 0; i < sequence.tokens[0].Length(); i++)
+                if (fileTree.getNodeChar(currentNodeId, currentNodeLastMatchedChar + 1) != '\\')
                 {
-                    if (isFirstStringDelimeterSequence && iLastProcessedChar + 1 + i == iLastPrefixFunctionProcessedChar + 1)
-                    {
-                        iLastPrefixFunctionProcessedChar++;
-                        lastPrefixFunction = calcPrefixFunction(lastPrefixFunction, lowerPath.GetChar(iLastPrefixFunctionProcessedChar), stringDelimeterSequenceIsFirst.tokens[0], stringDelimeterSequenceIsFirst.prefixFunctions[0]);
-                        if (lastPrefixFunction == stringDelimeterSequenceIsFirst.tokens[0].Length())
-                            prefixFunctionMaximums.push(iLastPrefixFunctionProcessedChar);
-                    }
-                    if (sequence.tokens[0].GetChar(i) != lowerPath.GetChar(iLastProcessedChar + 1 + i))
-                    {
-                        isMatch = false;
-                        break;
-                    }
+                    isMatch = false;
                 }
             }
             else
             {
                 isMatch = false;
             }
-            if (isMatch && (!isLast || iLastProcessedChar + (long long)sequence.tokens[0].Length() == (long long)lowerPath.Length() - 1))
+            if (isMatch)
             {
-                if (iLastProcessedChar + (long long)sequence.tokens[0].Length() == (long long)lowerPath.Length() - 1)
-                    isFullCoverage = true;
-                iLastProcessedChar = iLastProcessedChar + (long long)sequence.tokens[0].Length();
+                currentNodeLastMatchedChar++;
                 return true;
             }
             else
             {
-                if (iLastProcessedChar + (long long)sequence.tokens[0].Length() >= (long long)lowerPath.Length() &&
-                    lowerPath.SubString(iLastProcessedChar + 1, (long long)lowerPath.Length() - 1).IsSameAs(sequence.tokens[0].SubString(0, (long long)lowerPath.Length() - 1 - (iLastProcessedChar + 1))))
-                    isFullCoverage = true;
                 return false;
             }
         }
@@ -427,7 +372,7 @@ protected:
             long long pf = 0;
             bool isAsterisk = false;
             long long iFirstNotMatchedToken = 0;
-            long long iChar = iLastProcessedChar;
+            long long iChar = currentNodeLastMatchedChar;
             while (iFirstNotMatchedToken != sequence.tokens.size())
             {
                 if (sequence.tokensTypes[iFirstNotMatchedToken] == TokenType::Asterisk)
@@ -440,25 +385,18 @@ protected:
                     pf = 0;
                     long long iLastProcessedCharForString = iChar;
                     bool isMatch = false;
-                    while (iLastProcessedCharForString < (long long)lowerPath.Length() - 1 && lowerPath.GetChar(iLastProcessedCharForString + 1) != '\\')
+                    while (iLastProcessedCharForString < fileTree.getNodeLength(currentNodeId) - 1 && fileTree.getNodeChar(currentNodeId, iLastProcessedCharForString + 1) != '\\')
                     {
                         iLastProcessedCharForString++;
-                        if (isFirstStringDelimeterSequence && iLastProcessedCharForString == iLastPrefixFunctionProcessedChar + 1)
-                        {
-                            iLastPrefixFunctionProcessedChar++;
-                            lastPrefixFunction = calcPrefixFunction(lastPrefixFunction, lowerPath.GetChar(iLastPrefixFunctionProcessedChar), stringDelimeterSequenceIsFirst.tokens[0], stringDelimeterSequenceIsFirst.prefixFunctions[0]);
-                            if (lastPrefixFunction == (long long)stringDelimeterSequenceIsFirst.tokens[0].Length())
-                                prefixFunctionMaximums.push(iLastPrefixFunctionProcessedChar);
-                        }
-                        pf = calcPrefixFunction(pf, lowerPath.GetChar(iLastProcessedCharForString), sequence.tokens[iFirstNotMatchedToken], sequence.prefixFunctions[iFirstNotMatchedToken]);
+                        pf = calcPrefixFunction(pf, fileTree.getNodeChar(currentNodeId, iLastProcessedCharForString), sequence.tokens[iFirstNotMatchedToken], sequence.prefixFunctions[iFirstNotMatchedToken]);
                         if (!isAsterisk && iLastProcessedCharForString - iChar != pf)
                         {
                             return false;
                         }
                         if (pf == sequence.tokens[iFirstNotMatchedToken].Length() &&
                             (iFirstNotMatchedToken < (long long)sequence.tokens.size() - 1 ||
-                             ((!isLast || iLastProcessedCharForString == (long long)lowerPath.Length() - 1) &&
-                              (!hasNextInLinkedSequence || iLastProcessedCharForString == (long long)lowerPath.Length() - 1 || lowerPath.GetChar(iLastProcessedCharForString + 1) == '\\')
+                             ((!isLast || iLastProcessedCharForString == fileTree.getNodeLength(currentNodeId) - 1) &&
+                              (!hasNextInLinkedSequence || iLastProcessedCharForString == fileTree.getNodeLength(currentNodeId) - 1 || fileTree.getNodeChar(currentNodeId, iLastProcessedCharForString + 1) == '\\')
                              )
                             )
                            )
@@ -478,57 +416,75 @@ protected:
                 }
 
             }
-            iLastProcessedChar = iChar;
+            currentNodeLastMatchedChar = iChar;
             if (isAsterisk)
             {
-                while (iLastProcessedChar + 1 < (long long)lowerPath.Length() && lowerPath.GetChar(iLastProcessedChar + 1) != '\\')
+                while (currentNodeLastMatchedChar + 1 < fileTree.getNodeLength(currentNodeId))
                 {
-                    iLastProcessedChar++;
-                    if (isFirstStringDelimeterSequence && iLastProcessedChar == iLastPrefixFunctionProcessedChar + 1)
-                    {
-                        iLastPrefixFunctionProcessedChar++;
-                        lastPrefixFunction = calcPrefixFunction(lastPrefixFunction, lowerPath.GetChar(iLastPrefixFunctionProcessedChar), stringDelimeterSequenceIsFirst.tokens[0], stringDelimeterSequenceIsFirst.prefixFunctions[0]);
-                        if (lastPrefixFunction == (long long)stringDelimeterSequenceIsFirst.tokens[0].Length())
-                            prefixFunctionMaximums.push(iLastPrefixFunctionProcessedChar);
-                    }
+                    currentNodeLastMatchedChar++;
                 }
             }
-            if (iLastProcessedChar == (long long)lowerPath.Length() - 1)
-                isFullCoverage = true;
             return true;
         }
     }
 
-    bool matchFirstSeq(wxString& lowerPath, TokenSequence& sequence, TokenSequenceType& sequenceType, bool isDoubleAsterisk, bool isLast, bool hasNextInLinkedSequence, bool& isFullCoverage)
+    bool matchFirstSeq(vector<FileTree::DelimeterFileNameNode*>& processingNodes,
+                       long long& iFirstSeqNode,
+                       long long& firstSeqNodeLastMatchedChar,
+                       TokenSequence& sequence, TokenSequenceType& sequenceType,
+                       bool isDoubleAsterisk, bool isLast, bool hasNextInLinkedSequence,
+                       bool& skipped)
     {
-        isFullCoverage = false;
-        if (sequenceType == TokenSequenceType::StringDelimeterSequence)
+        skipped = false;
+        long long firstSeqNodeId = processingNodes[iFirstSeqNode]->nodeId;
+        if (sequenceType == TokenSequenceType::Delimeter)
         {
-            long long cnt = 0;
-            while (prefixFunctionMaximums.empty() &&
-                   iLastPrefixFunctionProcessedChar < (long long)lowerPath.Length() - 1 &&
-                   (isDoubleAsterisk || (iLastPrefixFunctionProcessedChar < iLastMatchedChar + (long long)sequence.tokens[0].Length()))
-                   )
+            long long i;
+            bool match;
+            if (!isDoubleAsterisk)
             {
-                cnt++;
-                iLastPrefixFunctionProcessedChar++;
-                lastPrefixFunction = calcPrefixFunction(lastPrefixFunction, lowerPath.GetChar(iLastPrefixFunctionProcessedChar), sequence.tokens[0], sequence.prefixFunctions[0]);
-                if (lastPrefixFunction == sequence.tokens[0].Length() && (!isLast || iLastPrefixFunctionProcessedChar == (long long)lowerPath.Length() - 1))
-                    prefixFunctionMaximums.push(iLastPrefixFunctionProcessedChar);
+                if (firstSeqNodeLastMatchedChar + 1 < fileTree.getNodeLength(firstSeqNodeId) && fileTree.getNodeChar(firstSeqNodeId, firstSeqNodeLastMatchedChar + 1) == '\\')
+                {
+                    match = true;
+                    i = firstSeqNodeLastMatchedChar + 1;
+                }
+                else
+                    match = false;
+            } else
+            {
+                long long pos;
+                if (firstSeqNodeLastMatchedChar == -1)
+                    pos = 0;
+                else
+                {
+                    iFirstSeqNode++;
+                    firstSeqNodeLastMatchedChar = -1;
+                    if (iFirstSeqNode != processingNodes.size())
+                    {
+                        pos = 0;
+                    }
+                    else
+                    {
+                        skipped = true;
+                        return true;
+                    }
+                }
+                if (pos != -1)
+                {
+                    match = true;
+                    i = pos;
+                }
+                else
+                {
+                    match = false;
+                }
             }
-            if (!prefixFunctionMaximums.empty())
+            if (match)
             {
-                long long i = prefixFunctionMaximums.front();
-                if (i == (long long)lowerPath.Length() - 1)
-                    isFullCoverage = true;
-                prefixFunctionMaximums.pop();
-                //iFirstMatchedChar = i - sequence.tokens[0].Length() + 1;
-                iLastMatchedChar = i;
+                firstSeqNodeLastMatchedChar = i;
                 return true;
             } else
             {
-                if (isDoubleAsterisk || (iLastPrefixFunctionProcessedChar == (long long)lowerPath.Length() - 1 && lastPrefixFunction == cnt))
-                    isFullCoverage = true;
                 return false;
             }
         }
@@ -539,14 +495,30 @@ protected:
                 long long pf = 0;
                 bool isAsterisk = false;
                 long long iFirstNotMatchedToken = 0;
-                long long iChar = iLastMatchedChar;
+                long long iChar = firstSeqNodeLastMatchedChar;
                 bool isMatch = false;
-                if (isDoubleAsterisk && iChar + 1 < (long long)lowerPath.Length() && lowerPath.GetChar(iChar + 1) == '\\')
-                    iChar++;
-                if (iChar == (long long)lowerPath.Length() - 1)
+                if (isDoubleAsterisk)
+                {
+                    if (iFirstSeqNode != (long long)processingNodes.size() - 1 && firstSeqNodeLastMatchedChar == fileTree.getNodeLength(firstSeqNodeId) - 1)
+                    {
+                        iFirstSeqNode++;
+                        firstSeqNodeId = processingNodes[iFirstSeqNode]->nodeId;
+                        firstSeqNodeLastMatchedChar = -1;
+                        iChar = -1;
+                    }
+                    if (iChar + 1 < fileTree.getNodeLength(firstSeqNodeId) && fileTree.getNodeChar(firstSeqNodeId, iChar + 1) == '\\')
+                    {
+                        iChar++;
+                        firstSeqNodeLastMatchedChar++;
+                    }
+                }
+                if (iFirstSeqNode == (long long)processingNodes.size() - 1 && iChar == fileTree.getNodeLength(firstSeqNodeId) - 1)
                 {
                     if (isDoubleAsterisk)
-                        isFullCoverage = true;
+                    {
+                        skipped = true;
+                        return true;
+                    }
                     return false;
                 }
                 while (iFirstNotMatchedToken != sequence.tokens.size())
@@ -561,10 +533,10 @@ protected:
                         pf = 0;
                         long long iLastProcessedCharForString = iChar;
                         isMatch = false;
-                        while (iLastProcessedCharForString < (long long)lowerPath.Length() - 1 && lowerPath.GetChar(iLastProcessedCharForString + 1) != '\\')
+                        while (iLastProcessedCharForString < fileTree.getNodeLength(firstSeqNodeId) - 1 && fileTree.getNodeChar(firstSeqNodeId, iLastProcessedCharForString + 1) != '\\')
                         {
                             iLastProcessedCharForString++;
-                            pf = calcPrefixFunction(pf, lowerPath.GetChar(iLastProcessedCharForString), sequence.tokens[iFirstNotMatchedToken], sequence.prefixFunctions[iFirstNotMatchedToken]);
+                            pf = calcPrefixFunction(pf, fileTree.getNodeChar(firstSeqNodeId, iLastProcessedCharForString), sequence.tokens[iFirstNotMatchedToken], sequence.prefixFunctions[iFirstNotMatchedToken]);
                             if (!isAsterisk && !isDoubleAsterisk && iLastProcessedCharForString - iChar != pf)
                             {
                                 isMatch = false;
@@ -572,8 +544,8 @@ protected:
                             }
                             if (pf == sequence.tokens[iFirstNotMatchedToken].Length() &&
                                 (iFirstNotMatchedToken < (long long)sequence.tokens.size() - 1 ||
-                                 ((!isLast || iLastProcessedCharForString == (long long)lowerPath.Length() - 1) &&
-                                  (!hasNextInLinkedSequence || iLastProcessedCharForString == (long long)lowerPath.Length() - 1 || lowerPath.GetChar(iLastProcessedCharForString + 1) == '\\')
+                                 ((!isLast || iLastProcessedCharForString == fileTree.getNodeLength(firstSeqNodeId) - 1) &&
+                                  (!hasNextInLinkedSequence || iLastProcessedCharForString == fileTree.getNodeLength(firstSeqNodeId) - 1 || fileTree.getNodeChar(firstSeqNodeId, iLastProcessedCharForString + 1) == '\\')
                                  )
                                 )
                                )
@@ -597,139 +569,212 @@ protected:
                 {
                     if (isDoubleAsterisk)
                     {
-                        while (iLastMatchedChar + 1 < (long long)lowerPath.Length() && lowerPath.GetChar(iLastMatchedChar + 1) != '\\')
-                            iLastMatchedChar++;
+                        while (firstSeqNodeLastMatchedChar + 1 < fileTree.getNodeLength(firstSeqNodeId) && fileTree.getNodeChar(firstSeqNodeId, firstSeqNodeLastMatchedChar + 1) != '\\')
+                            firstSeqNodeLastMatchedChar++;
                     }
+                    else
+                        return false;
                 }
                 else
                 {
-                    iLastMatchedChar = iChar;
+                    firstSeqNodeLastMatchedChar = iChar;
                     if (isAsterisk)
                     {
-                        while (iLastMatchedChar + 1 < (long long)lowerPath.Length() && lowerPath.GetChar(iLastMatchedChar + 1) != '\\')
+                        while (firstSeqNodeLastMatchedChar + 1 < fileTree.getNodeLength(firstSeqNodeId))
                         {
-                            iLastMatchedChar++;
+                            firstSeqNodeLastMatchedChar++;
                         }
                     }
 
-                    if (iLastMatchedChar == (long long)lowerPath.Length() - 1)
-                        isFullCoverage = true;
                     return true;
                 }
             }
         }
     }
 
-    bool processLinkedSequence(LinkedSequence& linkedSequence, wxString& lowerPath,
-                               long long& iLastChar,
+    bool processLinkedSequence(LinkedSequence linkedSequence,
+                               long long newNodeId, long long& newNodeLastMatchedChar, long long& firstNotMatchedLinkedSequence, long long& firstNotMatchedSequenceInLinkedSequence, long long& nodeIdOfFirstSequenceInLinkedSequence,
                                bool isDoubleAsterisk,
                                bool isLast,
-                               bool& isFullCoverage)
+                               bool shiftFirstSeq)
     {
-        isFullCoverage = false;
-        bool newIsFullCoverage;
-        long long iLastProcessedChar = iLastChar;
-        int iFirstNotMatchedSeq;
-        matchSequenceReset(iLastProcessedChar, linkedSequence.sequences[0], linkedSequence.sequencesTypes[0]);
-        while (true)
+        vector<FileTree::DelimeterFileNameNode*> processingNodes;
+        long long iCurrentNode, currentNodeLastMatchedChar = newNodeLastMatchedChar;
+        long long iFirstSeqNode = 0;
+        if (nodeIdOfFirstSequenceInLinkedSequence == -1)
+            nodeIdOfFirstSequenceInLinkedSequence = newNodeId;
+        processingNodes = fileTree.getNodesInProcessing(newNodeId, nodeIdOfFirstSequenceInLinkedSequence);
+        iCurrentNode = processingNodes.size() - 1;
+
+        if (shiftFirstSeq)
         {
-            if (!matchFirstSeq(lowerPath, linkedSequence.sequences[0], linkedSequence.sequencesTypes[0], isDoubleAsterisk, isLast && linkedSequence.sequences.size() == 1, linkedSequence.sequences.size() > 1, newIsFullCoverage))
+            iFirstSeqNode++;
+        }
+
+        while (firstNotMatchedSequenceInLinkedSequence != linkedSequence.sequences.size())
+        {
+            if (firstNotMatchedSequenceInLinkedSequence != 0)
+                if (matchSeq(processingNodes[iCurrentNode]->nodeId,
+                             currentNodeLastMatchedChar,
+                             linkedSequence.sequences[firstNotMatchedSequenceInLinkedSequence],
+                             linkedSequence.sequencesTypes[firstNotMatchedSequenceInLinkedSequence],
+                             isLast && (long long)linkedSequence.sequences.size() - 1 == firstNotMatchedSequenceInLinkedSequence,
+                             linkedSequence.sequences.size() > firstNotMatchedSequenceInLinkedSequence + 1))
+                {
+                    firstNotMatchedSequenceInLinkedSequence++;
+                    if (currentNodeLastMatchedChar == fileTree.getNodeLength(processingNodes[iCurrentNode]->nodeId) - 1)
+                    {
+                        iCurrentNode++;
+                        if (iCurrentNode == processingNodes.size())
+                        {
+                            break;
+                        }
+                        currentNodeLastMatchedChar = -1;
+                    }
+                }
+                else
+                {
+                    if (isDoubleAsterisk)
+                    {
+                        iFirstSeqNode++;
+                        firstNotMatchedSequenceInLinkedSequence = 0;
+                        if (iFirstSeqNode == processingNodes.size())
+                        {
+                            newNodeLastMatchedChar = fileTree.getNodeLength(processingNodes[iCurrentNode]->nodeId) - 1;
+                            nodeIdOfFirstSequenceInLinkedSequence = -1;
+                            return true;
+                        }
+                    }
+                    else
+                        return false;
+                }
+            else
             {
-                isFullCoverage = isFullCoverage || newIsFullCoverage;
-                iLastChar = iLastProcessedChar;
-                return false;
+                long long firstSeqNodeLastMatchedChar = -1;
+                bool skipped;
+                if (matchFirstSeq(processingNodes, iFirstSeqNode, firstSeqNodeLastMatchedChar,
+                                  linkedSequence.sequences[firstNotMatchedSequenceInLinkedSequence],
+                                  linkedSequence.sequencesTypes[firstNotMatchedSequenceInLinkedSequence],
+                                  isDoubleAsterisk,
+                                  isLast && (long long)linkedSequence.sequences.size() - 1 == firstNotMatchedSequenceInLinkedSequence,
+                                  linkedSequence.sequences.size() > firstNotMatchedSequenceInLinkedSequence + 1,
+                                  skipped))
+                {
+                    if (skipped)
+                    {
+                        newNodeLastMatchedChar = fileTree.getNodeLength(processingNodes[iCurrentNode]->nodeId) - 1;
+                        nodeIdOfFirstSequenceInLinkedSequence = -1;
+                        return true;
+                    }
+                    currentNodeLastMatchedChar = firstSeqNodeLastMatchedChar;
+                    iCurrentNode = iFirstSeqNode;
+                    firstNotMatchedSequenceInLinkedSequence++;
+                    if (currentNodeLastMatchedChar == fileTree.getNodeLength(processingNodes[iCurrentNode]->nodeId) - 1)
+                    {
+                        iCurrentNode++;
+                        if (iCurrentNode == processingNodes.size())
+                        {
+                            break;
+                        }
+                        currentNodeLastMatchedChar = -1;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        newNodeLastMatchedChar = currentNodeLastMatchedChar;
+        nodeIdOfFirstSequenceInLinkedSequence = processingNodes[iFirstSeqNode]->nodeId;
+        if (firstNotMatchedSequenceInLinkedSequence == linkedSequence.sequences.size())
+        {
+            firstNotMatchedLinkedSequence++;
+            firstNotMatchedSequenceInLinkedSequence = 0;
+            if (firstNotMatchedLinkedSequence != linkedSequences.size())
+                nodeIdOfFirstSequenceInLinkedSequence = -1;
+        }
+        return true;
+    }
+
+    MatchResult match(long long newNodeId)
+    {
+        long long firstNotMatchedLinkedSequence = 0;
+        long long firstNotMatchedSequenceInLinkedSequence = 0;
+        long long nodeIdOfFirstSequenceInLinkedSequence = -1;
+        long long newNodeLastMatchedChar = -1;
+
+        long long prevNodeId = fileTree.getPrevNodeId(newNodeId);
+
+        bool shiftFirstSeq = false;
+
+        if (prevNodeId != -1)
+        {
+            firstNotMatchedLinkedSequence = fileTree.getFirstNotMatchedLinkedSequence(prevNodeId);
+            firstNotMatchedSequenceInLinkedSequence = fileTree.getFirstNotMatchedSequenceInLinkedSequence(prevNodeId);
+            nodeIdOfFirstSequenceInLinkedSequence = fileTree.getNodeIdOfFirstSequenceInLinkedSequence(prevNodeId);
+
+            if (firstNotMatchedLinkedSequence == linkedSequences.size())
+            {
+                if (linkedSequences.size() > 0)
+                {
+                    if (linkedSequencesTypes.back() == LinkedSequenceType::LinkedSequence)
+                    {
+                        shiftFirstSeq = true;
+                        firstNotMatchedLinkedSequence--;
+                        firstNotMatchedSequenceInLinkedSequence = 0;
+                    }
+                }
+            }
+        }
+
+        while (firstNotMatchedLinkedSequence < linkedSequencesTypes.size())
+        {
+            if (linkedSequencesTypes[firstNotMatchedLinkedSequence] == LinkedSequenceType::DoubleAsterisk)
+            {
+                firstNotMatchedLinkedSequence++;
+                firstNotMatchedSequenceInLinkedSequence = 0;
+                nodeIdOfFirstSequenceInLinkedSequence = -1;
             }
             else
             {
-                isFullCoverage = isFullCoverage || newIsFullCoverage;
-                iFirstNotMatchedSeq = 1;
-                iLastProcessedChar = iLastMatchedChar;
-            }
-            while (iFirstNotMatchedSeq < linkedSequence.sequences.size())
-            {
-                if (matchSeq(lowerPath, linkedSequence.sequences[iFirstNotMatchedSeq], linkedSequence.sequencesTypes[iFirstNotMatchedSeq], iLastProcessedChar, isLast && linkedSequence.sequences.size() - 1 == iFirstNotMatchedSeq, linkedSequence.sequences.size() > iFirstNotMatchedSeq + 1, newIsFullCoverage))
-                {
-                    isFullCoverage = isFullCoverage || newIsFullCoverage;
-                    iFirstNotMatchedSeq++;
-                }
-                else
-                {
-                    isFullCoverage = isFullCoverage || newIsFullCoverage;
-                    break;
-                }
-            }
-            if (iFirstNotMatchedSeq == linkedSequence.sequences.size())
-            {
-                iLastChar = iLastProcessedChar;
-                return true;
-            }
-        }
-    }
+                bool isDoubleAsterisk = firstNotMatchedLinkedSequence >= 1;
 
-    MatchResult match(Path path)
-    {
-        /**
-        hello**tank*i*onli**ne
-        **tanki/online**
-        doubleASeq = (**)?(ASeq||strDelSeq)(**)?(ASeq||strDelSeq)(**)? // (str1*str2)/(str3*str4*str5)
-        strDelSeq = (\)?str1\str2(\)?   // str1*str2/str3 -> (str1*str2)/str3
-        ASeq = *str1*str2*str3*
-
-        aaa/aaa/aaa/aaa/ab
-        aaa/aaa/ab или (aaa/aaa/)(*b)
-        **/
-
-        long long iLastProcessedChar = -1;
-        bool isDoubleAsterisk = false;
-        bool isDoubleAsteriskAtAll = false;
-        wxString lowerPath = path.fullPath.Lower();
-        for (int iLSequence = 0; iLSequence < linkedSequences.size(); iLSequence++)
-        {
-            if (linkedSequencesTypes[iLSequence] == LinkedSequenceType::DoubleAsterisk)
-            {
-                isDoubleAsterisk = true;
-                isDoubleAsteriskAtAll = true;
-            }
-            if (linkedSequencesTypes[iLSequence] == LinkedSequenceType::LinkedSequence)
-            {
                 bool processResult;
-                bool isFullCoverage = false;
-                if (isAppendSlash && !path.isDir)
+                if (isAppendSlash && !fileTree.isDir(newNodeId))
                     processResult = false;
                 else
-                    processResult = processLinkedSequence(linkedSequences[iLSequence],
-                                                           lowerPath,
-                                                           iLastProcessedChar,
-                                                           isDoubleAsterisk,
-                                                           iLSequence == linkedSequences.size() - 1,
-                                                           isFullCoverage
-                                                          );
+                processResult = processLinkedSequence(linkedSequences[firstNotMatchedLinkedSequence],
+                                      newNodeId, newNodeLastMatchedChar, firstNotMatchedLinkedSequence, firstNotMatchedSequenceInLinkedSequence, nodeIdOfFirstSequenceInLinkedSequence,
+                                      isDoubleAsterisk,
+                                      firstNotMatchedLinkedSequence == (long long)linkedSequences.size() - 1,
+                                      shiftFirstSeq);
                 if (!processResult)
                 {
-                    if (isDoubleAsteriskAtAll || isFullCoverage)
-                        return MatchResult::NoMatchAndPartial;
-                    else
-                        return MatchResult::NoMatchAndFull;
+                    return MatchResult::NoMatchAndFull;
                 }
-                isDoubleAsterisk = false;
+                else if (newNodeLastMatchedChar == fileTree.getFileName(newNodeId).Length())
+                    break;
             }
         }
-        if (iLastProcessedChar == (long long)lowerPath.Length() - 1)
+
+        fileTree.updateNode(newNodeId, firstNotMatchedLinkedSequence, firstNotMatchedSequenceInLinkedSequence, nodeIdOfFirstSequenceInLinkedSequence, newNodeLastMatchedChar);
+
+        if (firstNotMatchedLinkedSequence == linkedSequences.size())
         {
-            if (isDoubleAsteriskAtAll)
+            if (linkedSequencesTypes.size() >= 2 || (linkedSequencesTypes.size() == 1 && linkedSequencesTypes[0] == LinkedSequenceType::DoubleAsterisk))
                 return MatchResult::MatchAndPartial;
             else
                 return MatchResult::MatchAndFull;
         }
-        else if (isDoubleAsterisk)
-        {
-            return MatchResult::MatchAndPartial;
-        }
-
-        if (isDoubleAsteriskAtAll)
-            return MatchResult::NoMatchAndPartial;
         else
-            return MatchResult::NoMatchAndFull;
+        {
+            if (newNodeLastMatchedChar == fileTree.getNodeLength(newNodeId) - 1)
+                return MatchResult::NoMatchAndPartial;
+            else
+                return MatchResult::NoMatchAndFull;
+        }
     }
 
 public:
@@ -746,61 +791,71 @@ class BfsSearcher : public Searcher
 private:
     SearchExitCode bfs(wxString currentDir)
     {
-        queue<Path> allPathes;
-        allPathes.push(Path(L"", true, true));
-        while (!allPathes.empty())
+        fileTree = FileTree();
+        queue<long long> allFilesIds;
+        allFilesIds.push(-1);
+        while (!allFilesIds.empty())
         {
             if (testDestroy())
                 return SearchExitCode::Delete;
             if (updateWorker())
                 return SearchExitCode::Update;
 
-            Path path = allPathes.front();
-            allPathes.pop();
+            long long currentNodeId = allFilesIds.front();
+            allFilesIds.pop();
 
-            MatchResult mResult = match(path);
+            MatchResult mResult;
+            if (currentNodeId != -1)
+                mResult = match(currentNodeId);
+            else
+                if (linkedSequences.size() == 0)
+                    mResult = MatchResult::MatchAndFull;
+                else
+                    mResult = MatchResult::NoMatchAndPartial;
+
             if ((mResult == MatchResult::MatchAndFull || mResult == MatchResult::MatchAndPartial))
             {
                 wregex re(L"[A-Za-z]:");
                 wsmatch m;
-                if (regex_match(currentDir.ToStdWstring(), m, re) && path.fullPath == L"")
+                if (regex_match(currentDir.ToStdWstring(), m, re) && currentNodeId == -1)
                 {
-                    path.fullPath.Append("\\");
-                    currentDir.Append(path.fullPath);
-                    onSuccessMatch(currentDir, path.isDir);
-                    currentDir.RemoveLast(path.fullPath.Length());
-                    path.fullPath.RemoveLast(1);
+                    currentDir.Append("\\");
+                    onSuccessMatch(currentDir, fileTree.isDir(currentNodeId));
+                    currentDir.RemoveLast(1);
                 }
                 else
                 {
                     if (!isAppendSlash)
                     {
-                        currentDir.Append(path.fullPath);
-                        onSuccessMatch(currentDir, path.isDir);
-                        currentDir.RemoveLast(path.fullPath.Length());
+                        wxString path = fileTree.getFullPath(currentNodeId);
+                        currentDir.Append(path);
+                        onSuccessMatch(currentDir, fileTree.isDir(currentNodeId));
+                        currentDir.RemoveLast(path.Length());
                     }
                     else
                     {
-                        path.fullPath.Append("\\");
-                        currentDir.Append(path.fullPath);
-                        onSuccessMatch(currentDir, path.isDir);
-                        currentDir.RemoveLast(path.fullPath.Length());
-                        path.fullPath.RemoveLast(1);
+                        wxString path = fileTree.getFullPath(currentNodeId);
+                        path.Append("\\");
+                        currentDir.Append(path);
+                        onSuccessMatch(currentDir, fileTree.isDir(currentNodeId));
+                        currentDir.RemoveLast(path.Length());
                     }
                 }
             }
-            if (mResult == MatchResult::MatchAndPartial || mResult == MatchResult::NoMatchAndPartial)
+            if (fileTree.isDir(currentNodeId) && (mResult == MatchResult::MatchAndPartial || mResult == MatchResult::NoMatchAndPartial))
             {
                 vector<Path> pathes;
-                loadFileNamesInCurrentPath(currentDir + path.fullPath, pathes);
+                loadFileNamesInCurrentPath(currentDir + fileTree.getFullPath(currentNodeId), pathes);
 
                 for (int i = 0; i < pathes.size(); i++)
                 {
-                    pathes[i].fullPath = path.fullPath + "\\" + pathes[i].fullPath;
-                    allPathes.push(pathes[i]);
+                    long long nodeId = fileTree.addNode(currentNodeId, pathes[i].fullPath, pathes[i].isDir);
+                    allFilesIds.push(nodeId);
                 }
             }
         }
+
+        fileTree = FileTree();
 
         return SearchExitCode::Success;
     }

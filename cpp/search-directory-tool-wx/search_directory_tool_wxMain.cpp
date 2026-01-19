@@ -695,13 +695,14 @@ wxThread::ExitCode search_directory_tool_wxFrame::Entry()
         if (sdToken.Length() >= 3 && regex_match(sdToken.SubString(0, 2).ToStdWstring(), m2, re2))
         {
             currentPath = sdToken.SubString(0, 1);
+            wxString sdToken1 = sdToken.SubString(2, sdToken.Length() - 1);
 
             lastTime = clock();
 
             PathesExchange::pushPercentage(version, make_pair(PercentageType::Absolute, 0));
             pType = PercentageType::Absolute;
             //exitCode = dfsMatch2(currentPath, currentPathLower, currentPath.Length() - 1, tokens, tokensTypes, -1, iFirstToken, iFirstToken, false, true, lastTime, 0, 100, pType, version, sdToken, time);
-            exitCode = searcher->search(currentPath, sdToken, pType, this, version, sdToken, time);
+            exitCode = searcher->search(currentPath, sdToken1, pType, this, version, sdToken, time);
             if (exitCode == SearchExitCode::Delete)
                 break;
             if (exitCode == SearchExitCode::Update)
