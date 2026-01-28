@@ -7,9 +7,11 @@
 #include <queue>
 #include <string>
 #include <windows.h>
+#include <regex>
 
 #include "concurrency.h"
 #include "search_tree.h"
+#include "RecordsDispatcher.h"
 
 using namespace std;
 
@@ -64,6 +66,8 @@ protected:
     };
 
     enum class MatchResult {MatchAndFull, MatchAndPartial, NoMatchAndFull, NoMatchAndPartial};
+
+    const wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 
     wxThreadHelper* tHelper;
     long long version;
@@ -166,7 +170,7 @@ protected:
         }
     }
 
-    void parseExpression(wxString expression)
+    void parseSdToken(wxString expression)
     {
         expression.Replace("/", "\\");
         expression.MakeLower();
@@ -254,7 +258,7 @@ protected:
                 linkedSequences.back().sequences.push_back(ts);
                 linkedSequences.back().sequencesTypes.push_back(TokenSequenceType::FileNameSequence);
             }
-            else // StringDelimeterSequence
+            else
             {
                 if (linkedSequencesTypes.size() == 0 || linkedSequencesTypes.back() == LinkedSequenceType::DoubleAsterisk)
                 {
@@ -292,15 +296,13 @@ protected:
         calcPrefixFunctions();
     }
 
-    void initFields(wxString expression, PercentageType pType, wxThreadHelper* tHelper,
+    void initFields(wxThreadHelper* tHelper,
                     long long& version, wxString& sdToken, double& time)
     {
-        this->pType = pType;
         this->tHelper = tHelper;
         this->version = version;
         this->sdToken = sdToken;
         this->time = time;
-        parseExpression(expression);
     }
 
     void cloneFields(long long& version, wxString& sdToken, double& time)
@@ -754,7 +756,7 @@ protected:
                 {
                     return MatchResult::NoMatchAndFull;
                 }
-                else if (newNodeLastMatchedChar == fileTree.getFileName(newNodeId).Length())
+                else if (newNodeLastMatchedChar == fileTree.getFileName(newNodeId).Length() && (firstNotMatchedLinkedSequence != (long long)linkedSequences.size() - 1 || linkedSequencesTypes[firstNotMatchedLinkedSequence] != LinkedSequenceType::DoubleAsterisk))
                     break;
             }
         }
@@ -778,9 +780,7 @@ protected:
     }
 
 public:
-    virtual SearchExitCode search(wxString currentDir, wxString expression,
-                                  PercentageType pType, wxThreadHelper* tHelper,
-                                  long long& version, wxString& sdToken, double& time)
+    virtual SearchExitCode search(wxString &sdToken, long long& version, double& time, wxThreadHelper* tHelper)
     {
         return SearchExitCode::Success;
     }
@@ -859,18 +859,203 @@ private:
 
         return SearchExitCode::Success;
     }
-public:
-    SearchExitCode search(wxString currentDir, wxString expression,
-                          PercentageType pType, wxThreadHelper* tHelper,
-                          long long& version, wxString& sdToken, double& time) override
+
+    bool aliasSearchPrepare(wxString sdToken, wxString& currentDir, wxString& preparedSdToken)
     {
-        initFields(expression, pType, tHelper, version, sdToken, time);
+        wxString dirsPath = exePath.BeforeLast('\\');
+        dirsPath.Append("\\dirs.txt");
+        RecordsDispatcher dirs(dirsPath.ToStdWstring());
+        dirs.load_dirs();
+        wstring dir;
+        long long iFirstNotAliasChar = 0;
+        while (sdToken.Length() > iFirstNotAliasChar &&
+               sdToken.GetChar(iFirstNotAliasChar) != '*' &&
+               sdToken.GetChar(iFirstNotAliasChar) != '\\' &&
+               sdToken.GetChar(iFirstNotAliasChar) != '/')
+                iFirstNotAliasChar++;
+        bool isAlias = dirs.get_path_with_alias(sdToken.SubString(0, iFirstNotAliasChar - 1).ToStdWstring(), dir);
+        dirs.save_dirs();
+        if (isAlias)
+        {
+            wregex re1(L"[A-Za-z]:\\\\");
+            wsmatch m1;
+            if (regex_match(dir, m1, re1))
+            {
+                dir.pop_back();
+            }
 
-        SearchExitCode exitCode = bfs(currentDir);
+            currentDir = dir;
 
-        cloneFields(version, sdToken, time);
+            preparedSdToken = sdToken.SubString(iFirstNotAliasChar, sdToken.Length() - 1);
 
-        return exitCode;
+            wregex re2(L"([\\\\/]\\.\\.)*(([\\\\/]|(\\*\\*)).*)?");
+            wregex re3(L"^[\\\\/]\\.\\.");
+            wstring s = preparedSdToken.ToStdWstring();
+            if (regex_match(s, re2))
+            {
+                int cnt = 0;
+                wsmatch m;
+                for (; regex_search(s, m, re3); s = m.suffix())
+                {
+                    cnt++;
+                }
+                wxFileName trimmedDir = wxFileName::DirName(currentDir);
+                if (trimmedDir.GetDirCount() + 1 > cnt)
+                {
+                    while (cnt != 0)
+                    {
+                        cnt--;
+                        trimmedDir.RemoveLastDir();
+                    }
+                    currentDir = trimmedDir.GetFullPath();
+                    currentDir.RemoveLast();
+                    preparedSdToken = s;
+                    return true;
+                } else
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    bool relativePathSearchPrepare(wxString sdToken, wxString& currentDir, wxString& preparedSdToken)
+    {
+        if (sdToken.Length() > 0 && (sdToken.GetChar(0) == '\\' || sdToken.GetChar(0) == '/'))
+        {
+            return false;
+        }
+
+        if (sdToken == ".")
+        {
+            sdToken = "";
+        }
+        if (sdToken.StartsWith("./") || sdToken.StartsWith(".\\"))
+        {
+            sdToken = sdToken.SubString(2, sdToken.Length() - 1);
+        }
+
+        int cnt = 0;
+        while (sdToken.StartsWith("..\\") || sdToken.StartsWith("../"))
+        {
+            sdToken = sdToken.SubString(3, sdToken.Length());
+            cnt++;
+        }
+        if (sdToken.StartsWith(".."))
+        {
+            if (sdToken == "..")
+            {
+                sdToken = "";
+                cnt++;
+            }
+            else if (sdToken.StartsWith("..**"))
+            {
+                sdToken = sdToken.SubString(2, sdToken.Length());
+                cnt++;
+            } else
+            {
+                return false;
+            }
+        }
+        wxFileName trimmedDir = wxFileName::DirName(wxFileName::GetCwd());
+        if (trimmedDir.GetDirCount() + 1 > cnt)
+        {
+            while (cnt != 0)
+            {
+                cnt--;
+                trimmedDir.RemoveLastDir();
+            }
+            currentDir = trimmedDir.GetFullPath();
+            currentDir.RemoveLast();
+        }
+        else
+            return false;
+
+        if (!sdToken.StartsWith("**"))
+            sdToken = '/' + sdToken;
+        preparedSdToken = sdToken;
+
+        return true;
+    }
+
+    bool absolutePathSearchPrepare(wxString sdToken, wxString& currentDir, wxString& preparedSdToken)
+    {
+        wregex re(L"[A-Za-z]:[\\\\/]");
+        wsmatch m;
+        if (sdToken.Length() >= 3 && regex_match(sdToken.SubString(0, 2).ToStdWstring(), m, re))
+        {
+            currentDir = sdToken.SubString(0, 1);
+            preparedSdToken = sdToken.SubString(2, sdToken.Length() - 1);
+            return true;
+        }
+        return false;
+    }
+
+public:
+    SearchExitCode search(wxString &sdToken, long long& version, double& time, wxThreadHelper* tHelper) override
+    {
+        initFields(tHelper, version, sdToken, time);
+        wxString preparedSdToken;
+        wxString currentDir;
+
+        if (aliasSearchPrepare(sdToken, currentDir, preparedSdToken))
+        {
+            this->pType = PercentageType::Alias;
+            onPercentageChanged(0);
+
+            parseSdToken(preparedSdToken);
+
+            SearchExitCode exitCode = bfs(currentDir);
+            if (exitCode == SearchExitCode::Delete)
+                return SearchExitCode::Delete;
+            if (exitCode == SearchExitCode::Update)
+            {
+                cloneFields(version, sdToken, time);
+                return SearchExitCode::Update;
+            }
+            onPercentageChanged(100);
+        }
+
+        if (relativePathSearchPrepare(sdToken, currentDir, preparedSdToken))
+        {
+            this->pType = PercentageType::Relative;
+            onPercentageChanged(0);
+
+            parseSdToken(preparedSdToken);
+
+            SearchExitCode exitCode = bfs(currentDir);
+            if (exitCode == SearchExitCode::Delete)
+                return SearchExitCode::Delete;
+            if (exitCode == SearchExitCode::Update)
+            {
+                cloneFields(version, sdToken, time);
+                return SearchExitCode::Update;
+            }
+            onPercentageChanged(100);
+        }
+
+        if (absolutePathSearchPrepare(sdToken, currentDir, preparedSdToken))
+        {
+            this->pType = PercentageType::Absolute;
+            onPercentageChanged(0);
+
+            parseSdToken(preparedSdToken);
+
+            SearchExitCode exitCode = bfs(currentDir);
+            if (exitCode == SearchExitCode::Delete)
+                return SearchExitCode::Delete;
+            if (exitCode == SearchExitCode::Update)
+            {
+                cloneFields(version, sdToken, time);
+                return SearchExitCode::Update;
+            }
+            onPercentageChanged(100);
+        }
+
+        return SearchExitCode::Success;
     }
 };
 

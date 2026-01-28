@@ -14,6 +14,7 @@
 #include <wx/frame.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
+#include <wx/statusbr.h>
 #include <wx/textctrl.h>
 #include <wx/timer.h>
 //*)
@@ -62,41 +63,23 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         void selectRow();
         void selectRowWithMouse();
         wxThread::ExitCode Entry();
-        void splitOnTokens(wxString sdToken, vector<wxString>& tokens, vector<SdTokenType>& tokensTypes);
         void setPercentage(pair<PercentageType, int> percentage);
-        //DfsMatchExitCode dfsMatch(int iToken, vector<wxString>& tokens, vector<SdTokenType>& tokensTypes, wxString& currentPath, bool isSearch, bool isDir, clock_t& lastTime, long long &version, wxString& sdToken, double& time);
-        //DfsMatchExitCode dfsMatch3(wxString& currentPath, wxString& currentPathLower,
-        //                           vector<wxString>&tokens, vector<SdTokenType>& tokensTypes,
-        //                           int iFirstTokenOfSlashOrSubstringSuffix, int iFirstNotMatchedToken, int& iFirstToken,
-        //                           bool isSearch, bool isDir,
-        //                           clock_t lastTime, double percentageStart, double percentageEnd, PercentageType& pType,
-        //                           long long& version, wxString& sdToken, double& time);
 
         //(*Identifiers(search_directory_tool_wxFrame)
         static const wxWindowID ID_STATICTEXTSD;
         static const wxWindowID ID_TEXTCTRLCOMMAND;
         static const wxWindowID ID_STATICTEXTPLACEHOLDER1;
         static const wxWindowID ID_STATICTEXTPATHESLABEL;
-        static const wxWindowID ID_STATICTEXTALIAS;
-        static const wxWindowID ID_STATICTEXTALIASPERCENTAGE;
-        static const wxWindowID ID_STATICTEXTREL;
-        static const wxWindowID ID_STATICTEXTRELPERCENTAGE;
-        static const wxWindowID ID_STATICTEXTABS;
-        static const wxWindowID ID_STATICTEXTABSPERCENTAGE;
         static const wxWindowID ID_TEXTCTRLPATHES;
         static const wxWindowID ID_TIMER1;
+        static const wxWindowID ID_STATUSBAR1;
         //*)
 
         //(*Declarations(search_directory_tool_wxFrame)
-        wxStaticText* StaticTextAbs;
-        wxStaticText* StaticTextAbsPercentage;
-        wxStaticText* StaticTextAlias;
-        wxStaticText* StaticTextAliasPercentage;
         wxStaticText* StaticTextPathesLabel;
         wxStaticText* StaticTextPlaceholder1;
-        wxStaticText* StaticTextRel;
-        wxStaticText* StaticTextRelPercentage;
         wxStaticText* StaticTextSd;
+        wxStatusBar* StatusBar1;
         wxTextCtrl* TextCtrlCommand;
         wxTextCtrl* TextCtrlPathes;
         wxTimer Timer1;
