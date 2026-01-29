@@ -64,7 +64,7 @@ search_directory_tool_wxFrame::search_directory_tool_wxFrame(wxWindow* parent,wx
     BoxSizer1->Add(TextCtrlPathes, 10, wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND, 5);
     SetSizer(BoxSizer1);
     Timer1.SetOwner(this, ID_TIMER1);
-    Timer1.Start(200, false);
+    Timer1.Start(50, false);
     StatusBar1 = new wxStatusBar(this, ID_STATUSBAR1, 0, _T("ID_STATUSBAR1"));
     int __wxStatusBarWidths_1[3] = { -1, -1, -1 };
     int __wxStatusBarStyles_1[3] = { wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL };
@@ -89,6 +89,8 @@ search_directory_tool_wxFrame::search_directory_tool_wxFrame(wxWindow* parent,wx
     TextCtrlPathes->Connect(ID_TEXTCTRLPATHES, wxEVT_KEY_DOWN, wxKeyEventHandler (search_directory_tool_wxFrame::OnPathesKeyDown), NULL, this);
     TextCtrlPathes->Connect(ID_TEXTCTRLPATHES, wxEVT_LEFT_DOWN, wxMouseEventHandler (search_directory_tool_wxFrame::OnPathesLeftDown), NULL, this);
     TextCtrlPathes->Connect(ID_TEXTCTRLPATHES, wxEVT_LEFT_UP, wxMouseEventHandler (search_directory_tool_wxFrame::OnPathesLeftUp), NULL, this);
+
+    pathesController = PathesController(TextCtrlPathes);
 
     setPercentage(make_pair(PercentageType::Alias, -1));
     setPercentage(make_pair(PercentageType::Relative, -1));
@@ -150,7 +152,7 @@ wxThread::ExitCode search_directory_tool_wxFrame::Entry()
                 break;
             }
 
-            wxThread::This()->Sleep(100);
+            wxThread::This()->Sleep(25);
         }
         if (GetThread()->TestDestroy())
             return nullptr;
@@ -175,129 +177,46 @@ void search_directory_tool_wxFrame::OnQuit(wxCommandEvent& event)
     Close();
 }
 
-long getNumberLines(wxTextCtrl* textCtrl)
-{
-    wxString text = textCtrl->GetValue();
-    long cnt = 0;
-    for (size_t i = 0; i < text.length(); i++)
-        if (text.GetChar(i) == '\n')
-            cnt++;
-    return cnt + 1;
-}
-
-long getRowStartPosition(wxTextCtrl* textCtrl, long row)
-{
-    wxString text = textCtrl->GetValue();
-    if (row == 0)
-        return 0;
-    long iRow = 0;
-    for (size_t i = 0; i < text.length(); i++)
-    {
-        if (text.GetChar(i) == '\n')
-        {
-            iRow += 1;
-            if (iRow == row)
-                return i + 1;
-        }
-    }
-    return text.length();
-}
-
-long getRowLength(wxTextCtrl* textCtrl, long row)
-{
-    wxString text = textCtrl->GetValue();
-    long iRow = 0, rowStart = 0;
-    for (size_t i = 0; i < text.length(); i++)
-    {
-        if (text.GetChar(i) == '\n')
-        {
-            if (iRow == row)
-                return i - rowStart;
-            iRow++;
-            rowStart = i + 1;
-        }
-    }
-    if (iRow == row)
-    {
-        return text.length() - rowStart;
-    } else
-    {
-        return 0;
-    }
-}
-
-void positionToXY(wxTextCtrl* textCtrl, long position, long&x, long& y)
-{
-    wxString text = textCtrl->GetValue();
-    long iRow = 0, rowStart = 0;
-    for (size_t i = 0; i < text.length(); i++)
-    {
-        if (text.GetChar(i) == '\n')
-        {
-            if (rowStart <= position && position <= (long)i)
-            {
-                x = i - rowStart;
-                y = iRow;
-                return;
-            }
-            iRow++;
-            rowStart = i + 1;
-        }
-    }
-    if (rowStart <= position && position <= (long)text.length())
-    {
-        x = position - rowStart;
-        y = iRow;
-    } else
-    {
-        x = text.length() - rowStart;
-        y = iRow;
-    }
-}
-
-void search_directory_tool_wxFrame::selectRow()
-{
-    if (selectedRow < -1 || selectedRow >= getNumberLines(TextCtrlPathes))
-        return;
-    if (selectedRow == -1)
-    {
-        TextCtrlPathes->SelectNone();
-        TextCtrlCommand->SetFocus();
-        return;
-    }
-
-    {
-        int startSel = 0, endSel = -1;
-        startSel = getRowStartPosition(TextCtrlPathes, selectedRow);
-        endSel = startSel + getRowLength(TextCtrlPathes, selectedRow);
-
-        TextCtrlPathes->SetSelection(startSel, endSel);
-        TextCtrlPathes->SetFocus();
-    }
-}
-
 void search_directory_tool_wxFrame::OnKeyDown(wxKeyEvent& event)
 {
     switch (event.GetKeyCode())
     {
     case WXK_UP:
-        if (selectedRow >= 0)
-            selectedRow--;
-        selectRow();
+        bool isReset;
+        pathesController.selectPrevPath(isReset);
+        if (isReset)
+            TextCtrlCommand->SetFocus();
         break;
     case WXK_DOWN:
-        if (selectedRow < getNumberLines(TextCtrlPathes) - 1)
-            selectedRow += 1;
-        selectRow();
+        pathesController.selectNextPath();
+        break;
+    case WXK_TAB:
+        if (pathesController.getPathesCount() > 0 && pathesController.getSelectedPath() >= 0)
+        {
+            wxString path;
+            bool isDir;
+            pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
+            if (!isDir)
+            {
+                size_t pos = path.Last('\\');
+                path = path.SubString(0, pos);
+            } else
+            {
+                if (!path.EndsWith("\\"))
+                    path.Append('\\');
+            }
+
+            TextCtrlCommand->SetValue(path + "*");
+            TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 1);
+            TextCtrlCommand->SetFocus();
+        }
         break;
     case WXK_BACK:
-        selectedRow = -1;
-        TextCtrlPathes->SelectNone();
+        pathesController.pathSelectReset();
         TextCtrlCommand->SetFocus();
         break;
     case WXK_ESCAPE:
-        selectedRow = -1;
-        TextCtrlPathes->SelectNone();
+        pathesController.pathSelectReset();
         TextCtrlCommand->SetFocus();
         break;
     default:
@@ -313,14 +232,9 @@ void search_directory_tool_wxFrame::OnCommandKeyDown(wxKeyEvent& event)
     switch (event.GetKeyCode())
     {
     case WXK_UP:
-        if (selectedRow >= 0)
-            selectedRow--;
-        selectRow();
         break;
     case WXK_DOWN:
-        if (selectedRow < getNumberLines(TextCtrlPathes) - 1)
-            selectedRow += 1;
-        selectRow();
+        pathesController.selectNextPath();
         break;
     case WXK_RETURN:
         break;
@@ -355,23 +269,41 @@ void search_directory_tool_wxFrame::OnPathesKeyDown(wxKeyEvent& event)
     switch (event.GetKeyCode())
     {
     case WXK_UP:
-        if (selectedRow >= 0)
-            selectedRow--;
-        selectRow();
+        bool isReset;
+        pathesController.selectPrevPath(isReset);
+        if (isReset)
+            TextCtrlCommand->SetFocus();
         break;
     case WXK_DOWN:
-        if (selectedRow < getNumberLines(TextCtrlPathes) - 1)
-            selectedRow += 1;
-        selectRow();
+        pathesController.selectNextPath();
+        break;
+    case WXK_TAB:
+        if (pathesController.getPathesCount() > 0 && pathesController.getSelectedPath() >= 0)
+        {
+            wxString path;
+            bool isDir;
+            pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
+            if (!isDir)
+            {
+                size_t pos = path.Last('\\');
+                path = path.SubString(0, pos);
+            } else
+            {
+                if (!path.EndsWith("\\"))
+                    path.Append('\\');
+            }
+
+            TextCtrlCommand->SetValue(path + "*");
+            TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 1);
+            TextCtrlCommand->SetFocus();
+        }
         break;
     case WXK_BACK:
-        selectedRow = -1;
-        TextCtrlPathes->SelectNone();
+        pathesController.pathSelectReset();
         TextCtrlCommand->SetFocus();
         break;
     case WXK_ESCAPE:
-        selectedRow = -1;
-        TextCtrlPathes->SelectNone();
+        pathesController.pathSelectReset();
         TextCtrlCommand->SetFocus();
         break;
     case WXK_DELETE:
@@ -384,25 +316,9 @@ void search_directory_tool_wxFrame::OnPathesKeyDown(wxKeyEvent& event)
     }
 }
 
-void search_directory_tool_wxFrame::selectRowWithMouse()
+void search_directory_tool_wxFrame::selectPathWithMouse()
 {
-    long x, y;
-    positionToXY(TextCtrlPathes, TextCtrlPathes->GetInsertionPoint(), x, y);
-    selectedRow = y;
-
-    if (selectedRow < 0 || selectedRow >= TextCtrlPathes->GetNumberOfLines())
-        return;
-
-    long int l, r;
-    TextCtrlPathes->GetSelection(&l, &r);
-    if (l == r)
-    {
-        int startSel = 0, endSel = -1;
-        startSel = getRowStartPosition(TextCtrlPathes, selectedRow);
-        endSel = startSel + getRowLength(TextCtrlPathes, selectedRow);
-        TextCtrlPathes->SetSelection(startSel, endSel);
-        TextCtrlPathes->SetFocus();
-    }
+    pathesController.selectPathWithMouse();
 }
 
 void search_directory_tool_wxFrame::OnLeftDown(wxMouseEvent& event)
@@ -411,21 +327,24 @@ void search_directory_tool_wxFrame::OnLeftDown(wxMouseEvent& event)
 
 void search_directory_tool_wxFrame::OnCommandLeftDown(wxMouseEvent& event)
 {
-    selectedRow = -1;
-    TextCtrlPathes->SelectNone();
+    pathesController.pathSelectReset();
     TextCtrlCommand->SetFocus();
     event.Skip();
 }
 
 void search_directory_tool_wxFrame::OnPathesLeftDown(wxMouseEvent& event)
 {
-    event.Skip();
+    if (pathesController.getPathesCount() != 0)
+        event.Skip();
 }
 
 void search_directory_tool_wxFrame::OnPathesLeftUp(wxMouseEvent& event)
 {
-    event.Skip();
-    CallAfter(search_directory_tool_wxFrame::selectRowWithMouse);
+    if (pathesController.getPathesCount() != 0)
+    {
+        event.Skip();
+        CallAfter(search_directory_tool_wxFrame::selectPathWithMouse);
+    }
 }
 
 void search_directory_tool_wxFrame::OnTextCtrlCommandText(wxCommandEvent& event)
@@ -440,9 +359,7 @@ void search_directory_tool_wxFrame::OnTextCtrlCommandText(wxCommandEvent& event)
         setPercentage(make_pair(PercentageType::Relative, -1));
         setPercentage(make_pair(PercentageType::Absolute, -1));
 
-        TextCtrlPathes->Clear();
-        isFirstInPathes = true;
-        pathesCount = 0;
+        pathesController.clear();
 
         double time = SdTokenExchange::DEFAULT_TIME;
         wxString sdToken;
@@ -481,44 +398,10 @@ void search_directory_tool_wxFrame::OnTimer1Trigger(wxTimerEvent& event)
     clock_t st = clock();
     PathesExchange::Path path("", false, false);
 
-    wxFont underlinedFont = TextCtrlPathes->GetFont();
-    underlinedFont.SetUnderlined(true);
-    wxTextAttr defaultStyle = TextCtrlPathes->GetDefaultStyle();
-    wxTextAttr underlinedStyle = defaultStyle;
-    underlinedStyle.SetFont(underlinedFont);
-
-    wxFont dirFont = TextCtrlPathes->GetFont();
-    dirFont.SetStyle(wxFONTSTYLE_ITALIC);
-    dirFont.SetUnderlined(true);
-    wxTextAttr dirStyle = defaultStyle;
-    dirStyle.SetFont(dirFont);
-
     while (clock() - st < TIME_ON_OnTimer1Trigger && PathesExchange::popPath(path))
     {
-        if (isFirstInPathes)
-        {
-            isFirstInPathes = false;
-        }
-        else
-            TextCtrlPathes->AppendText("\n");
-        if (!path.isDir)
-        {
-            size_t pos = path.fullPath.Last('\\');
-            TextCtrlPathes->AppendText(path.fullPath.SubString(0, pos));
-            TextCtrlPathes->SetDefaultStyle(dirStyle);
-            TextCtrlPathes->AppendText(path.fullPath.SubString(pos + 1, path.fullPath.Length() - 1));
-            TextCtrlPathes->SetDefaultStyle(defaultStyle);
-        }
-        else
-        {
-            size_t pos = path.fullPath.Last('\\');
-            TextCtrlPathes->AppendText(path.fullPath.SubString(0, pos));
-            TextCtrlPathes->SetDefaultStyle(underlinedStyle);
-            TextCtrlPathes->AppendText(path.fullPath.SubString(pos + 1, path.fullPath.Length() - 1));
-            TextCtrlPathes->SetDefaultStyle(defaultStyle);
-        }
-        pathesCount += 1;
-        if (pathesCount == MAX_PATHES_COUNT)
+        pathesController.appendPath(path.fullPath, path.isDir);
+        if (pathesController.getPathesCount() == MAX_PATHES_COUNT)
         {
             exchangeVersion += 1;
             PathesExchange::updateVersion(exchangeVersion);

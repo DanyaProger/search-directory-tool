@@ -910,6 +910,7 @@ private:
                     currentDir = trimmedDir.GetFullPath();
                     currentDir.RemoveLast();
                     preparedSdToken = s;
+
                     return true;
                 } else
                 {
@@ -974,7 +975,7 @@ private:
         else
             return false;
 
-        if (!sdToken.StartsWith("**"))
+        if (!sdToken.StartsWith("**") && sdToken != "")
             sdToken = '/' + sdToken;
         preparedSdToken = sdToken;
 

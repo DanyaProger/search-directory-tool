@@ -30,6 +30,7 @@
 #include "include/concurrency.h"
 #include "include/cmdline.h"
 #include "include/search.h"
+#include "include/controllers.h"
 #include "RecordsDispatcher.h"
 
 class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
@@ -60,10 +61,9 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         void OnTimer1Trigger(wxTimerEvent& event);
         //*)
 
-        void selectRow();
-        void selectRowWithMouse();
         wxThread::ExitCode Entry();
         void setPercentage(pair<PercentageType, int> percentage);
+        void selectPathWithMouse();
 
         //(*Identifiers(search_directory_tool_wxFrame)
         static const wxWindowID ID_STATICTEXTSD;
@@ -85,18 +85,12 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         wxTimer Timer1;
         //*)
 
-        int MATCH_MISS = 0, MATCH_SUCCEED = 1, MATCH_POSSIBLE = 2;
-        int selectedRow = -1;
         long long exchangeVersion = -1;
-        long long messagesCount = 0;
-        long long threadUpdatesCount = 0;
         long MAX_PATHES_COUNT = 147;
-        long pathesCount = 0;
         wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-        bool isFirstInPathes = true;
         CmdLineParser cmdLineParser = CmdLineParser(vector<CmdLineFlag>(), {CmdLineOption(true, "t", true, "time")});
         int aliasPercentage, relativePercentage, absolutePercentage;
-        clock_t findFileDuration = 0;
+        PathesController pathesController;
 
     public:
 
