@@ -1,21 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="sd-workspace">
-		<Project filename="search-directory-tool/search-directory-tool.cbp">
-			<Depends filename="terminal-sender/terminal-sender.cbp" />
+		<Project filename="search-directory-tool-wx/search-directory-tool-wx.cbp">
 			<Depends filename="DirectoryChangers/DirectoryChangers.cbp" />
 			<Depends filename="RecordsDispatcher/RecordsDispatcher.cbp" />
 		</Project>
-		<Project filename="terminal-sender/terminal-sender.cbp">
-			<Depends filename="InputSimulator/InputSimulator.cbp" />
-		</Project>
+		<Project filename="terminal-sender/terminal-sender.cbp" />
 		<Project filename="DirectoryChangers/DirectoryChangers.cbp" />
-		<Project filename="RecordsDispatcher/RecordsDispatcher.cbp" />
 		<Project filename="InputSimulator/InputSimulator.cbp" />
-		<Project filename="tests/tests.cbp">
-			<Depends filename="DirectoryChangers/DirectoryChangers.cbp" />
-			<Depends filename="RecordsDispatcher/RecordsDispatcher.cbp" />
-			<Depends filename="InputSimulator/InputSimulator.cbp" />
-		</Project>
+		<Project filename="RecordsDispatcher/RecordsDispatcher.cbp" />
+		<Project filename="tests/tests.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

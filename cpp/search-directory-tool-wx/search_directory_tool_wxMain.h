@@ -13,6 +13,7 @@
 //(*Headers(search_directory_tool_wxFrame)
 #include <wx/frame.h>
 #include <wx/sizer.h>
+#include <wx/statbmp.h>
 #include <wx/stattext.h>
 #include <wx/statusbr.h>
 #include <wx/textctrl.h>
@@ -21,6 +22,7 @@
 
 #include <regex>
 #include <windows.h>
+#include <map>
 
 #include <wx/filename.h>
 #include <wx/msgdlg.h>
@@ -30,8 +32,10 @@
 #include "include/concurrency.h"
 #include "include/cmdline.h"
 #include "include/search.h"
-#include "include/controllers.h"
+#include "include/pathes_controller.h"
+#include "include/winapi_controller.h"
 #include "RecordsDispatcher.h"
+#include "DirectoryChangers.h"
 
 class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
 {
@@ -68,6 +72,7 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         //(*Identifiers(search_directory_tool_wxFrame)
         static const wxWindowID ID_STATICTEXTSD;
         static const wxWindowID ID_TEXTCTRLCOMMAND;
+        static const wxWindowID ID_PARENTICONBITMAP;
         static const wxWindowID ID_STATICTEXTPLACEHOLDER1;
         static const wxWindowID ID_STATICTEXTPATHESLABEL;
         static const wxWindowID ID_TEXTCTRLPATHES;
@@ -76,6 +81,7 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         //*)
 
         //(*Declarations(search_directory_tool_wxFrame)
+        wxStaticBitmap* ParentIconBitmap;
         wxStaticText* StaticTextPathesLabel;
         wxStaticText* StaticTextPlaceholder1;
         wxStaticText* StaticTextSd;
@@ -90,7 +96,20 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         wxString exePath = wxStandardPaths::Get().GetExecutablePath();
         CmdLineParser cmdLineParser = CmdLineParser(vector<CmdLineFlag>(), {CmdLineOption(true, "t", true, "time")});
         int aliasPercentage, relativePercentage, absolutePercentage;
+
         PathesController pathesController;
+        WinApiController winApiController;
+
+        TerminalChangerType currentChangerType;
+        map<TerminalChangerType, wxBitmap> bitmaps;
+
+        map<TerminalChangerType, TerminalDirectoryChanger*> changers;
+        BashDirectoryChanger bashChanger = BashDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
+        CmdDirectoryChanger cmdChanger = CmdDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
+        ExplorerDirectoryChanger explorerChanger = ExplorerDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring(), true);
+        FarDirectoryChanger farChanger = FarDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
+        PowerShellDirectoryChanger powershellChanger = PowerShellDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
+        TotalCommanderDirectoryChanger totalCommanderChanger;
 
     public:
 

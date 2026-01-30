@@ -67,9 +67,11 @@ public:
 
 class ExplorerDirectoryChanger : public TerminalDirectoryChanger
 {
+private:
+    bool fromGui;
 public:
     ExplorerDirectoryChanger();
-    ExplorerDirectoryChanger(wstring exe_path);
+    ExplorerDirectoryChanger(wstring exe_path, bool fromGui = false);
 
     wstring path_to_cd_command(wstring path) override;
 

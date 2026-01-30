@@ -51,6 +51,10 @@ void TerminalDirectoryChanger::change_directory(wstring path)
             prepared_command.push_back(L'\"');
         }
     prepared_command = L"\"" + prepared_command + L"\"";
+    if (prepared_command.length() >= 4 && prepared_command.substr(prepared_command.length() - 4) == L"\\\\\"\"")
+    {
+        prepared_command = prepared_command.substr(0, prepared_command.length() - 4) + L"\\\\\\\"\"";
+    }
     if (prepared_command[prepared_command.size() - 2] == L'\\')
     {
         prepared_command[prepared_command.size() - 2] = L'\"';
@@ -122,7 +126,10 @@ void TotalCommanderDirectoryChanger::change_directory(wstring path)
 
 ExplorerDirectoryChanger::ExplorerDirectoryChanger() : TerminalDirectoryChanger(0) {}
 
-ExplorerDirectoryChanger::ExplorerDirectoryChanger(wstring exe_path) : TerminalDirectoryChanger(exe_path, 0) {}
+ExplorerDirectoryChanger::ExplorerDirectoryChanger(wstring exe_path, bool fromGui) : TerminalDirectoryChanger(exe_path, 0)
+{
+    this->fromGui = fromGui;
+}
 
 wstring ExplorerDirectoryChanger::path_to_cd_command(wstring path)
 {
@@ -148,14 +155,24 @@ void ExplorerDirectoryChanger::change_directory(wstring path)
             prepared_command.push_back(L'\"');
         }
     prepared_command = L"\"" + prepared_command + L"\"";
+    if (prepared_command.length() >= 4 && prepared_command.substr(prepared_command.length() - 4) == L"\\\\\"\"")
+    {
+        prepared_command = prepared_command.substr(0, prepared_command.length() - 4) + L"\\\\\\\"\"";
+    }
     if (prepared_command[prepared_command.size() - 2] == L'\\')
     {
         prepared_command[prepared_command.size() - 2] = L'\"';
         prepared_command[prepared_command.size() - 1] = L'\\';
     }
 
-    wstring commandLine = to_wstring(pid) + L" -d " + to_wstring(get_delay())
+    wstring commandLine;
+    if (!fromGui)
+        commandLine = to_wstring(pid) + L" -d " + to_wstring(get_delay())
                          + L" -kd " + to_wstring(VK_CONTROL) + L" -kd " + to_wstring(int('A')) + L" -ku " + to_wstring(VK_CONTROL) + L" -ku " + to_wstring(int('A'))
+                         + L" -t " + prepared_command + L" -kd " + to_wstring(VK_RETURN) + L" -ku " + to_wstring(VK_RETURN);
+    else
+        commandLine = to_wstring(pid) + L" -d " + to_wstring(get_delay())
+                         + L" -kd " + to_wstring(VK_CONTROL) + L" -kd " + to_wstring(int('L')) + L" -ku " + to_wstring(VK_CONTROL) + L" -ku " + to_wstring(int('L'))
                          + L" -t " + prepared_command + L" -kd " + to_wstring(VK_RETURN) + L" -ku " + to_wstring(VK_RETURN);
     wstring terminal_sender = (EXE_DIR/L"terminal-sender"/L"terminal-sender.exe").wstring();
     commandLine = terminal_sender + L" " + commandLine;

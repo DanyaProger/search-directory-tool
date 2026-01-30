@@ -4,3 +4,12 @@ aaaa ICON "icon.ico"
 #define wxUSE_DPI_AWARE_MANIFEST  2
 
 #include "wx/msw/wx.rc"
+
+bash RCDATA "images/bash16x16.png"
+cmd RCDATA "images/cmd16x16.png"
+explorer RCDATA "images/explorer16x16.png"
+far RCDATA "images/far16x16.png"
+powershell RCDATA "images/powershell16x16.png"
+totalcommander RCDATA "images/totalcmd16x16.png"
+none RCDATA "images/none16x16.png"
+

@@ -107,8 +107,11 @@
 		<Unit filename="include/cmdline.h" />
 		<Unit filename="include/concurrency.cpp" />
 		<Unit filename="include/concurrency.h" />
+		<Unit filename="include/pathes_controller.h" />
 		<Unit filename="include/search.h" />
 		<Unit filename="include/search_tree.h" />
+		<Unit filename="include/types.h" />
+		<Unit filename="include/winapi_controller.h" />
 		<Unit filename="resource.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>

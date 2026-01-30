@@ -19,6 +19,7 @@
 //(*IdInit(search_directory_tool_wxFrame)
 const wxWindowID search_directory_tool_wxFrame::ID_STATICTEXTSD = wxNewId();
 const wxWindowID search_directory_tool_wxFrame::ID_TEXTCTRLCOMMAND = wxNewId();
+const wxWindowID search_directory_tool_wxFrame::ID_PARENTICONBITMAP = wxNewId();
 const wxWindowID search_directory_tool_wxFrame::ID_STATICTEXTPLACEHOLDER1 = wxNewId();
 const wxWindowID search_directory_tool_wxFrame::ID_STATICTEXTPATHESLABEL = wxNewId();
 const wxWindowID search_directory_tool_wxFrame::ID_TEXTCTRLPATHES = wxNewId();
@@ -49,6 +50,8 @@ search_directory_tool_wxFrame::search_directory_tool_wxFrame(wxWindow* parent,wx
     wxFont TextCtrlCommandFont(9,wxFONTFAMILY_MODERN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Lucida Console"),wxFONTENCODING_DEFAULT);
     TextCtrlCommand->SetFont(TextCtrlCommandFont);
     BoxSizer2->Add(TextCtrlCommand, 5, wxALIGN_CENTER_VERTICAL, 5);
+    ParentIconBitmap = new wxStaticBitmap(this, ID_PARENTICONBITMAP, wxNullBitmap, wxDefaultPosition, wxSize(16,16), 0, _T("ID_PARENTICONBITMAP"));
+    BoxSizer2->Add(ParentIconBitmap, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
     BoxSizer1->Add(BoxSizer2, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     StaticTextPlaceholder1 = new wxStaticText(this, ID_STATICTEXTPLACEHOLDER1, wxEmptyString, wxDefaultPosition, wxSize(-1,10), 0, _T("ID_STATICTEXTPLACEHOLDER1"));
     BoxSizer1->Add(StaticTextPlaceholder1, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
@@ -91,6 +94,29 @@ search_directory_tool_wxFrame::search_directory_tool_wxFrame(wxWindow* parent,wx
     TextCtrlPathes->Connect(ID_TEXTCTRLPATHES, wxEVT_LEFT_UP, wxMouseEventHandler (search_directory_tool_wxFrame::OnPathesLeftUp), NULL, this);
 
     pathesController = PathesController(TextCtrlPathes);
+
+    bitmaps[TerminalChangerType::Bash] = wxBITMAP_PNG(bash);
+    bitmaps[TerminalChangerType::Cmd] = wxBITMAP_PNG(cmd);
+    bitmaps[TerminalChangerType::Explorer] = wxBITMAP_PNG(explorer);
+    bitmaps[TerminalChangerType::Far] = wxBITMAP_PNG(far);
+    bitmaps[TerminalChangerType::Powershell] = wxBITMAP_PNG(powershell);
+    bitmaps[TerminalChangerType::TotalCommander] = wxBITMAP_PNG(totalcommander);
+    bitmaps[TerminalChangerType::None] = wxBITMAP_PNG(none);
+
+    winApiController.saveForegroundWindow();
+    currentChangerType = TerminalChangerType::None;
+    if (winApiController.checkForegroundWindow())
+    {
+        currentChangerType = winApiController.getParentProcessType();
+        ParentIconBitmap->SetBitmap(wxBitmapBundle::FromBitmap(bitmaps[currentChangerType]));
+    }
+
+    changers[TerminalChangerType::Bash] = &bashChanger;
+    changers[TerminalChangerType::Cmd] = &cmdChanger;
+    changers[TerminalChangerType::Explorer] = &explorerChanger;
+    changers[TerminalChangerType::Far] = &farChanger;
+    changers[TerminalChangerType::Powershell] = &powershellChanger;
+    changers[TerminalChangerType::TotalCommander] = &totalCommanderChanger;
 
     setPercentage(make_pair(PercentageType::Alias, -1));
     setPercentage(make_pair(PercentageType::Relative, -1));
@@ -177,6 +203,30 @@ void search_directory_tool_wxFrame::OnQuit(wxCommandEvent& event)
     Close();
 }
 
+void search_directory_tool_wxFrame::OnClose(wxCloseEvent& event)
+{
+    if (GetThread() &&
+        GetThread()->IsRunning())
+            GetThread()->Delete();
+    Destroy();
+}
+
+wxString prepareDirFromPath(wxString path, bool isDir)
+{
+    wxString result;
+    if (!isDir)
+    {
+        size_t pos = path.Last('\\');
+        result = path.SubString(0, pos);
+    } else
+    {
+        result = path;
+        if (!path.EndsWith("\\"))
+            result.Append('\\');
+    }
+    return result;
+}
+
 void search_directory_tool_wxFrame::OnKeyDown(wxKeyEvent& event)
 {
     switch (event.GetKeyCode())
@@ -196,19 +246,29 @@ void search_directory_tool_wxFrame::OnKeyDown(wxKeyEvent& event)
             wxString path;
             bool isDir;
             pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
-            if (!isDir)
-            {
-                size_t pos = path.Last('\\');
-                path = path.SubString(0, pos);
-            } else
-            {
-                if (!path.EndsWith("\\"))
-                    path.Append('\\');
-            }
+            path = prepareDirFromPath(path, isDir);
 
             TextCtrlCommand->SetValue(path + "*");
             TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 1);
             TextCtrlCommand->SetFocus();
+        }
+        break;
+    case WXK_RETURN:
+        if (pathesController.getPathesCount() > 0 &&
+            pathesController.getSelectedPath() >= 0 &&
+            currentChangerType != TerminalChangerType::None &&
+            winApiController.checkForegroundWindow() &&
+            winApiController.checkParentProcess())
+        {
+            wxString path;
+            bool isDir;
+            pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
+            path = prepareDirFromPath(path, isDir);
+
+            Hide();
+            winApiController.focusForegroundWindow();
+            changers[currentChangerType]->change_directory(path.ToStdWstring());
+            Close();
         }
         break;
     case WXK_BACK:
@@ -283,19 +343,29 @@ void search_directory_tool_wxFrame::OnPathesKeyDown(wxKeyEvent& event)
             wxString path;
             bool isDir;
             pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
-            if (!isDir)
-            {
-                size_t pos = path.Last('\\');
-                path = path.SubString(0, pos);
-            } else
-            {
-                if (!path.EndsWith("\\"))
-                    path.Append('\\');
-            }
+            path = prepareDirFromPath(path, isDir);
 
             TextCtrlCommand->SetValue(path + "*");
             TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 1);
             TextCtrlCommand->SetFocus();
+        }
+        break;
+    case WXK_RETURN:
+        if (pathesController.getPathesCount() > 0 &&
+            pathesController.getSelectedPath() >= 0 &&
+            currentChangerType != TerminalChangerType::None &&
+            winApiController.checkForegroundWindow() &&
+            winApiController.checkParentProcess())
+        {
+            wxString path;
+            bool isDir;
+            pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
+            path = prepareDirFromPath(path, isDir);
+
+            Hide();
+            winApiController.focusForegroundWindow();
+            changers[currentChangerType]->change_directory(path.ToStdWstring());
+            Close();
         }
         break;
     case WXK_BACK:
@@ -307,8 +377,6 @@ void search_directory_tool_wxFrame::OnPathesKeyDown(wxKeyEvent& event)
         TextCtrlCommand->SetFocus();
         break;
     case WXK_DELETE:
-        break;
-    case WXK_RETURN:
         break;
     default:
         event.Skip();
@@ -376,14 +444,6 @@ void search_directory_tool_wxFrame::OnTextCtrlCommandText(wxCommandEvent& event)
             sdToken = parsed.arg(0);
         SdTokenExchange::pushSdToken(exchangeVersion, sdToken, time);
     }
-}
-
-void search_directory_tool_wxFrame::OnClose(wxCloseEvent& event)
-{
-    if (GetThread() &&
-        GetThread()->IsRunning())
-            GetThread()->Delete();
-    Destroy();
 }
 
 void search_directory_tool_wxFrame::OnTimer1Trigger(wxTimerEvent& event)
