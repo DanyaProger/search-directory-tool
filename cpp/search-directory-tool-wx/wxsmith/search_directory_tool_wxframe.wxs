@@ -2,6 +2,7 @@
 <wxsmith>
 	<object class="wxFrame" name="search_directory_tool_wxFrame">
 		<centered>1</centered>
+		<size>450,450</size>
 		<id_arg>0</id_arg>
 		<handler function="OnClose" entry="EVT_CLOSE" />
 		<handler function="OnKeyDown" entry="EVT_KEY_DOWN" />
@@ -23,12 +24,12 @@
 							</font>
 							<style>wxALIGN_LEFT|wxALIGN_CENTRE</style>
 						</object>
-						<flag>wxALIGN_CENTER_VERTICAL</flag>
-						<border>5</border>
+						<flag>wxTOP|wxALIGN_CENTER_VERTICAL</flag>
+						<border>1</border>
 					</object>
 					<object class="sizeritem">
 						<object class="wxTextCtrl" name="ID_TEXTCTRLCOMMAND" variable="TextCtrlCommand" member="yes">
-							<size>400,-1</size>
+							<size>-1,-1</size>
 							<font>
 								<size>9</size>
 								<style>normal</style>
@@ -37,22 +38,23 @@
 								<family>modern</family>
 								<face>Lucida Console</face>
 							</font>
+							<minsize>-1,-1</minsize>
 							<style>wxTE_PROCESS_ENTER|wxTE_RICH2|wxBORDER_NONE</style>
 							<handler function="OnTextCtrlCommandText" entry="EVT_TEXT" />
 						</object>
-						<flag>wxALIGN_CENTER_VERTICAL</flag>
-						<border>5</border>
-						<option>5</option>
+						<flag>wxTOP|wxBOTTOM|wxEXPAND</flag>
+						<border>3</border>
+						<option>1</option>
 					</object>
 					<object class="sizeritem">
 						<object class="wxStaticBitmap" name="ID_PARENTICONBITMAP" variable="ParentIconBitmap" member="yes">
 							<size>16,16</size>
 						</object>
-						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+						<flag>wxALL|wxEXPAND</flag>
 						<border>2</border>
 					</object>
 				</object>
-				<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+				<flag>wxALL|wxEXPAND</flag>
 				<border>5</border>
 			</object>
 			<object class="sizeritem">
@@ -80,12 +82,11 @@
 						<border>5</border>
 					</object>
 				</object>
-				<flag>wxEXPAND</flag>
+				<flag>wxALIGN_LEFT</flag>
 				<border>5</border>
 			</object>
 			<object class="sizeritem">
 				<object class="wxTextCtrl" name="ID_TEXTCTRLPATHES" variable="TextCtrlPathes" member="yes">
-					<size>-1,400</size>
 					<font>
 						<size>8</size>
 						<style>normal</style>
@@ -98,7 +99,7 @@
 				</object>
 				<flag>wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND</flag>
 				<border>5</border>
-				<option>10</option>
+				<option>1</option>
 			</object>
 		</object>
 		<object class="wxTimer" name="ID_TIMER1" variable="Timer1" member="yes">

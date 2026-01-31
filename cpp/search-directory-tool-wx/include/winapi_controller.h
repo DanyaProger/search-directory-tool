@@ -65,7 +65,7 @@ public:
                     CloseHandle(Handle);
                     return "";
                 }
-                if (Buffer[BufferSize - 1] != 0)
+                if (Buffer[BufferSize - 1] != (wchar_t)NULL)
                     break;
                 delete[] Buffer;
                 BufferSize *= 2;

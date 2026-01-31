@@ -83,7 +83,7 @@ public:
         else
         {
             size_t pos = path.Last('\\');
-            if (pos == (long long)path.Length() - 1)
+            if (path.Length() > 0 && pos == path.Length() - 1)
                 pos = path.find_last_of('\\', pos - 1);
             textCtrl->AppendText(path.SubString(0, pos));
             textCtrl->SetDefaultStyle(dirStyle);

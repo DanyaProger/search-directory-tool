@@ -95,6 +95,7 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         long MAX_PATHES_COUNT = 147;
         wxString exePath = wxStandardPaths::Get().GetExecutablePath();
         CmdLineParser cmdLineParser = CmdLineParser(vector<CmdLineFlag>(), {CmdLineOption(true, "t", true, "time")});
+        CmdLineArgs parsed;
         int aliasPercentage, relativePercentage, absolutePercentage;
 
         PathesController pathesController;

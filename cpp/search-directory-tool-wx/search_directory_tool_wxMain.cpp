@@ -40,19 +40,21 @@ search_directory_tool_wxFrame::search_directory_tool_wxFrame(wxWindow* parent,wx
     wxBoxSizer* BoxSizer3;
 
     Create(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("wxID_ANY"));
+    SetClientSize(wxSize(450,450));
     BoxSizer1 = new wxBoxSizer(wxVERTICAL);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
     StaticTextSd = new wxStaticText(this, ID_STATICTEXTSD, _(" sd "), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT|wxALIGN_CENTRE, _T("ID_STATICTEXTSD"));
     wxFont StaticTextSdFont(9,wxFONTFAMILY_MODERN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Lucida Console"),wxFONTENCODING_DEFAULT);
     StaticTextSd->SetFont(StaticTextSdFont);
-    BoxSizer2->Add(StaticTextSd, 0, wxALIGN_CENTER_VERTICAL, 5);
-    TextCtrlCommand = new wxTextCtrl(this, ID_TEXTCTRLCOMMAND, wxEmptyString, wxDefaultPosition, wxSize(400,-1), wxTE_PROCESS_ENTER|wxTE_RICH2|wxBORDER_NONE, wxDefaultValidator, _T("ID_TEXTCTRLCOMMAND"));
+    BoxSizer2->Add(StaticTextSd, 0, wxTOP|wxALIGN_CENTER_VERTICAL, 1);
+    TextCtrlCommand = new wxTextCtrl(this, ID_TEXTCTRLCOMMAND, wxEmptyString, wxDefaultPosition, wxSize(-1,-1), wxTE_PROCESS_ENTER|wxTE_RICH2|wxBORDER_NONE, wxDefaultValidator, _T("ID_TEXTCTRLCOMMAND"));
+    TextCtrlCommand->SetMinSize(wxSize(-1,-1));
     wxFont TextCtrlCommandFont(9,wxFONTFAMILY_MODERN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Lucida Console"),wxFONTENCODING_DEFAULT);
     TextCtrlCommand->SetFont(TextCtrlCommandFont);
-    BoxSizer2->Add(TextCtrlCommand, 5, wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer2->Add(TextCtrlCommand, 1, wxTOP|wxBOTTOM|wxEXPAND, 3);
     ParentIconBitmap = new wxStaticBitmap(this, ID_PARENTICONBITMAP, wxNullBitmap, wxDefaultPosition, wxSize(16,16), 0, _T("ID_PARENTICONBITMAP"));
-    BoxSizer2->Add(ParentIconBitmap, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 2);
-    BoxSizer1->Add(BoxSizer2, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer2->Add(ParentIconBitmap, 0, wxALL|wxEXPAND, 2);
+    BoxSizer1->Add(BoxSizer2, 0, wxALL|wxEXPAND, 5);
     StaticTextPlaceholder1 = new wxStaticText(this, ID_STATICTEXTPLACEHOLDER1, wxEmptyString, wxDefaultPosition, wxSize(-1,10), 0, _T("ID_STATICTEXTPLACEHOLDER1"));
     BoxSizer1->Add(StaticTextPlaceholder1, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
     BoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
@@ -60,11 +62,11 @@ search_directory_tool_wxFrame::search_directory_tool_wxFrame(wxWindow* parent,wx
     wxFont StaticTextPathesLabelFont(8,wxFONTFAMILY_MODERN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Lucida Console"),wxFONTENCODING_DEFAULT);
     StaticTextPathesLabel->SetFont(StaticTextPathesLabelFont);
     BoxSizer3->Add(StaticTextPathesLabel, 0, wxALL, 5);
-    BoxSizer1->Add(BoxSizer3, 0, wxEXPAND, 5);
-    TextCtrlPathes = new wxTextCtrl(this, ID_TEXTCTRLPATHES, wxEmptyString, wxDefaultPosition, wxSize(-1,400), wxTE_PROCESS_ENTER|wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH|wxTE_NOHIDESEL|wxBORDER_NONE, wxDefaultValidator, _T("ID_TEXTCTRLPATHES"));
+    BoxSizer1->Add(BoxSizer3, 0, wxALIGN_LEFT, 5);
+    TextCtrlPathes = new wxTextCtrl(this, ID_TEXTCTRLPATHES, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER|wxTE_MULTILINE|wxTE_READONLY|wxTE_RICH|wxTE_NOHIDESEL|wxBORDER_NONE, wxDefaultValidator, _T("ID_TEXTCTRLPATHES"));
     wxFont TextCtrlPathesFont(8,wxFONTFAMILY_MODERN,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_NORMAL,false,_T("Lucida Console"),wxFONTENCODING_DEFAULT);
     TextCtrlPathes->SetFont(TextCtrlPathesFont);
-    BoxSizer1->Add(TextCtrlPathes, 10, wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND, 5);
+    BoxSizer1->Add(TextCtrlPathes, 1, wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND, 5);
     SetSizer(BoxSizer1);
     Timer1.SetOwner(this, ID_TIMER1);
     Timer1.Start(50, false);
@@ -74,7 +76,7 @@ search_directory_tool_wxFrame::search_directory_tool_wxFrame(wxWindow* parent,wx
     StatusBar1->SetFieldsCount(3,__wxStatusBarWidths_1);
     StatusBar1->SetStatusStyles(3,__wxStatusBarStyles_1);
     SetStatusBar(StatusBar1);
-    BoxSizer1->SetSizeHints(this);
+    Layout();
     Center();
 
     Connect(ID_TEXTCTRLCOMMAND, wxEVT_COMMAND_TEXT_UPDATED, (wxObjectEventFunction)&search_directory_tool_wxFrame::OnTextCtrlCommandText);
@@ -153,10 +155,6 @@ wxThread::ExitCode search_directory_tool_wxFrame::Entry()
 
     vector<wxString> tokens;
     vector<SdTokenType> tokensTypes;
-    clock_t lastTime;
-    wxString currentPath;
-    wxString currentPathLower;
-    PercentageType pType;
     SearchExitCode exitCode = SearchExitCode::Success;
     BfsSearcher bfsSearcher;
     Searcher* searcher = &bfsSearcher;
@@ -247,8 +245,14 @@ void search_directory_tool_wxFrame::OnKeyDown(wxKeyEvent& event)
             bool isDir;
             pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
             path = prepareDirFromPath(path, isDir);
+            path.Append("*");
 
-            TextCtrlCommand->SetValue(path + "*");
+            if (parsed.argsSize() > 0)
+                parsed.setArg(0, path);
+            else
+                parsed.appendArg(path);
+
+            TextCtrlCommand->SetValue(parsed.toWxString());
             TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 1);
             TextCtrlCommand->SetFocus();
         }
@@ -305,7 +309,7 @@ void search_directory_tool_wxFrame::OnCommandKeyDown(wxKeyEvent& event)
         break;
     case WXK_DELETE:
         TextCtrlCommand->GetSelection(&from, &to);
-        if (from != to || TextCtrlCommand->GetInsertionPoint() < TextCtrlCommand->GetValue().Length())
+        if (from != to || TextCtrlCommand->GetInsertionPoint() < (long long)(TextCtrlCommand->GetValue().Length()))
             event.Skip();
         break;
     case WXK_TAB:
@@ -344,8 +348,14 @@ void search_directory_tool_wxFrame::OnPathesKeyDown(wxKeyEvent& event)
             bool isDir;
             pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
             path = prepareDirFromPath(path, isDir);
+            path.Append("*");
 
-            TextCtrlCommand->SetValue(path + "*");
+            if (parsed.argsSize() > 0)
+                parsed.setArg(0, path);
+            else
+                parsed.appendArg(path);
+
+            TextCtrlCommand->SetValue(parsed.toWxString());
             TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 1);
             TextCtrlCommand->SetFocus();
         }
@@ -431,7 +441,7 @@ void search_directory_tool_wxFrame::OnTextCtrlCommandText(wxCommandEvent& event)
 
         double time = SdTokenExchange::DEFAULT_TIME;
         wxString sdToken;
-        CmdLineArgs parsed = cmdLineParser.parseWithOneArg(TextCtrlCommand->GetValue());
+        parsed = cmdLineParser.parseWithOneArg(TextCtrlCommand->GetValue());
         if (parsed.isOption("time"))
         {
             wxString timeStr = parsed.getOption("time");
