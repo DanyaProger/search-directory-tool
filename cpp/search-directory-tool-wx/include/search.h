@@ -3,6 +3,8 @@
 
 #include <wx/string.h>
 #include <wx/thread.h>
+#include <wx/stdpaths.h>
+#include <wx/filename.h>
 #include <vector>
 #include <queue>
 #include <string>
@@ -348,7 +350,7 @@ protected:
         if (sequenceType == TokenSequenceType::Delimeter)
         {
             bool isMatch = true;
-            if (currentNodeLastMatchedChar + 1 < fileTree.getNodeLength(currentNodeId))
+            if (!isLast && currentNodeLastMatchedChar + 1 < fileTree.getNodeLength(currentNodeId))
             {
                 if (fileTree.getNodeChar(currentNodeId, currentNodeLastMatchedChar + 1) != '\\')
                 {
@@ -440,44 +442,49 @@ protected:
         {
             long long i;
             bool match;
-            if (!isDoubleAsterisk)
+            if (!isLast)
             {
-                if (firstSeqNodeLastMatchedChar + 1 < fileTree.getNodeLength(firstSeqNodeId) && fileTree.getNodeChar(firstSeqNodeId, firstSeqNodeLastMatchedChar + 1) == '\\')
+                if (!isDoubleAsterisk)
                 {
-                    match = true;
-                    i = firstSeqNodeLastMatchedChar + 1;
-                }
-                else
-                    match = false;
-            } else
-            {
-                long long pos;
-                if (firstSeqNodeLastMatchedChar == -1)
-                    pos = 0;
-                else
-                {
-                    iFirstSeqNode++;
-                    firstSeqNodeLastMatchedChar = -1;
-                    if (iFirstSeqNode != (long long)processingNodes.size())
+                    if (firstSeqNodeLastMatchedChar + 1 < fileTree.getNodeLength(firstSeqNodeId) && fileTree.getNodeChar(firstSeqNodeId, firstSeqNodeLastMatchedChar + 1) == '\\')
                     {
+                        match = true;
+                        i = firstSeqNodeLastMatchedChar + 1;
+                    }
+                    else
+                        match = false;
+                } else
+                {
+                    long long pos;
+                    if (firstSeqNodeLastMatchedChar == -1)
                         pos = 0;
+                    else
+                    {
+                        iFirstSeqNode++;
+                        firstSeqNodeLastMatchedChar = -1;
+                        if (iFirstSeqNode != (long long)processingNodes.size())
+                        {
+                            pos = 0;
+                        }
+                        else
+                        {
+                            skipped = true;
+                            return true;
+                        }
+                    }
+                    if (pos != -1)
+                    {
+                        match = true;
+                        i = pos;
                     }
                     else
                     {
-                        skipped = true;
-                        return true;
+                        match = false;
                     }
                 }
-                if (pos != -1)
-                {
-                    match = true;
-                    i = pos;
-                }
-                else
-                {
-                    match = false;
-                }
             }
+            else
+                match = false;
             if (match)
             {
                 firstSeqNodeLastMatchedChar = i;
@@ -631,6 +638,7 @@ protected:
                 {
                     if (isDoubleAsterisk)
                     {
+                        shiftFirstSeq = true;
                         iFirstSeqNode++;
                         firstNotMatchedSequenceInLinkedSequence = 0;
                         if (iFirstSeqNode == (long long)processingNodes.size())
@@ -645,7 +653,11 @@ protected:
                 }
             else
             {
-                long long firstSeqNodeLastMatchedChar = -1;
+                long long firstSeqNodeLastMatchedChar;
+                if (shiftFirstSeq)
+                    firstSeqNodeLastMatchedChar = -1;
+                else
+                    firstSeqNodeLastMatchedChar = newNodeLastMatchedChar;
                 bool skipped;
                 if (matchFirstSeq(processingNodes, iFirstSeqNode, firstSeqNodeLastMatchedChar,
                                   linkedSequence.sequences[firstNotMatchedSequenceInLinkedSequence],

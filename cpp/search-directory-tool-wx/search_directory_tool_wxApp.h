@@ -14,10 +14,13 @@
 
 #include <wx/app.h>
 
+#include "include/search.h"
+
 class search_directory_tool_wxApp : public wxApp
 {
     public:
         virtual bool OnInit();
+        virtual int OnRun();
         wxLocale defaultLocale;
 };
 

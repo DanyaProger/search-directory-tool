@@ -22,7 +22,7 @@ bool search_directory_tool_wxApp::OnInit()
     //(*AppInitialize
     bool wxsOK = true;
     wxInitAllImageHandlers();
-    if ( wxsOK )
+    if ( true )
     {
         search_directory_tool_wxFrame* Frame = new search_directory_tool_wxFrame(0);
         Frame->Show();
@@ -30,5 +30,11 @@ bool search_directory_tool_wxApp::OnInit()
     }
     //*)
     return wxsOK;
+}
 
+int search_directory_tool_wxApp::OnRun()
+{
+    wxApp::OnRun();
+    //ExitMainLoop();
+    return 0;
 }
