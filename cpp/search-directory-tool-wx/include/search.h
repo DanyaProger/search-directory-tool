@@ -11,6 +11,7 @@
 
 #include "concurrency.h"
 #include "search_tree.h"
+#include "percentage.h"
 #include "RecordsDispatcher.h"
 
 using namespace std;
@@ -786,6 +787,12 @@ private:
         fileTree = FileTree();
         queue<long long> allFilesIds;
         allFilesIds.push(-1);
+
+        int depth = 0;
+        long long currentDepthCount = 0;
+        long long nextDepthCount = 0;
+        PercentageCalculator percentageCalculator;
+
         while (!allFilesIds.empty())
         {
             if (testDestroy())
@@ -795,6 +802,18 @@ private:
 
             long long currentNodeId = allFilesIds.front();
             allFilesIds.pop();
+
+            if (fileTree.isDir(currentNodeId))
+            {
+                if (fileTree.getNodeDepth(currentNodeId) != depth)
+                {
+                    if  (depth != 0 && percentageCalculator.addLayer(depth, currentDepthCount, nextDepthCount))
+                        onPercentageChanged(percentageCalculator.getPercentage());
+                    depth++;
+                    currentDepthCount = nextDepthCount;
+                    nextDepthCount = 0;
+                }
+            }
 
             MatchResult mResult;
             if (currentNodeId != -1)
@@ -841,10 +860,20 @@ private:
 
                 for (int i = 0; i < (long long)(pathes.size()); i++)
                 {
+                    if (pathes[i].isDir)
+                        nextDepthCount++;
                     long long nodeId = fileTree.addNode(currentNodeId, pathes[i].fullPath, pathes[i].isDir);
                     allFilesIds.push(nodeId);
                 }
             }
+        }
+
+        if (currentDepthCount != 0)
+        {
+            if  (depth != 0 && percentageCalculator.addLayer(depth, currentDepthCount, 0))
+                onPercentageChanged(percentageCalculator.getPercentage());
+            depth++;
+            currentDepthCount = 0;
         }
 
         fileTree = FileTree();
@@ -869,12 +898,8 @@ private:
         dirs.save_dirs();
         if (isAlias)
         {
-            wregex re1(L"[A-Za-z]:\\\\");
-            wsmatch m1;
-            if (regex_match(dir, m1, re1))
-            {
+            if (dir.back() == L'\\')
                 dir.pop_back();
-            }
 
             currentDir = dir;
 

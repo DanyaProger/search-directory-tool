@@ -20,6 +20,7 @@ public:
         wxString fileName;
         wxString fileNameLower;
         bool isDir;
+        int depth;
 
         long long firstNotMatchedLinkedSequence = 0;
         long long firstNotMatchedSequenceInLinkedSequence = 0;
@@ -40,6 +41,7 @@ public:
     {
         DelimeterFileNameNode node(prevNodeId, fileName, isDir);
         long long result = node.nodeId = nodes.size();
+        node.depth = getNodeDepth(prevNodeId) + 1;
         nodes.push_back(node);
 
         return result;
@@ -135,6 +137,14 @@ public:
             return '\\';
         else
             return nodes[nodeId].fileNameLower.GetChar(i - 1);
+    }
+
+    int getNodeDepth(long long nodeId)
+    {
+        if (nodeId == -1)
+            return 0;
+        else
+            return nodes[nodeId].depth;
     }
 
     long long getFirstNotMatchedLinkedSequence(long long nodeId)
