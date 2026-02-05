@@ -68,6 +68,8 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         wxThread::ExitCode Entry();
         void setPercentage(pair<PercentageType, int> percentage);
         void selectPathWithMouse();
+        void tryComplete();
+        void tryChangeDirectory();
 
         //(*Identifiers(search_directory_tool_wxFrame)
         static const wxWindowID ID_STATICTEXTSD;

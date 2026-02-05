@@ -225,6 +225,47 @@ wxString prepareDirFromPath(wxString path, bool isDir)
     return result;
 }
 
+void search_directory_tool_wxFrame::tryComplete()
+{
+    if (pathesController.getPathesCount() > 0 && pathesController.getSelectedPath() >= 0)
+    {
+        wxString path;
+        bool isDir;
+        pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
+        path = prepareDirFromPath(path, isDir);
+        path.Append("*");
+
+        if (parsed.argsSize() > 0)
+            parsed.setArg(0, path);
+        else
+            parsed.appendArg(path);
+
+        TextCtrlCommand->SetValue(parsed.toWxString());
+        TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 1);
+        TextCtrlCommand->SetFocus();
+    }
+}
+
+void search_directory_tool_wxFrame::tryChangeDirectory()
+{
+    if (pathesController.getPathesCount() > 0 &&
+            pathesController.getSelectedPath() >= 0 &&
+            currentChangerType != TerminalChangerType::None &&
+            winApiController.checkForegroundWindow() &&
+            winApiController.checkParentProcess())
+    {
+        wxString path;
+        bool isDir;
+        pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
+        path = prepareDirFromPath(path, isDir);
+
+        Hide();
+        winApiController.focusForegroundWindow();
+        changers[currentChangerType]->change_directory(path.ToStdWstring());
+        Close();
+    }
+}
+
 void search_directory_tool_wxFrame::OnKeyDown(wxKeyEvent& event)
 {
     switch (event.GetKeyCode())
@@ -239,41 +280,10 @@ void search_directory_tool_wxFrame::OnKeyDown(wxKeyEvent& event)
         pathesController.selectNextPath();
         break;
     case WXK_TAB:
-        if (pathesController.getPathesCount() > 0 && pathesController.getSelectedPath() >= 0)
-        {
-            wxString path;
-            bool isDir;
-            pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
-            path = prepareDirFromPath(path, isDir);
-            path.Append("*");
-
-            if (parsed.argsSize() > 0)
-                parsed.setArg(0, path);
-            else
-                parsed.appendArg(path);
-
-            TextCtrlCommand->SetValue(parsed.toWxString());
-            TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 1);
-            TextCtrlCommand->SetFocus();
-        }
+        tryComplete();
         break;
     case WXK_RETURN:
-        if (pathesController.getPathesCount() > 0 &&
-            pathesController.getSelectedPath() >= 0 &&
-            currentChangerType != TerminalChangerType::None &&
-            winApiController.checkForegroundWindow() &&
-            winApiController.checkParentProcess())
-        {
-            wxString path;
-            bool isDir;
-            pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
-            path = prepareDirFromPath(path, isDir);
-
-            Hide();
-            winApiController.focusForegroundWindow();
-            changers[currentChangerType]->change_directory(path.ToStdWstring());
-            Close();
-        }
+        tryChangeDirectory();
         break;
     case WXK_BACK:
         pathesController.pathSelectReset();
@@ -282,45 +292,6 @@ void search_directory_tool_wxFrame::OnKeyDown(wxKeyEvent& event)
     case WXK_ESCAPE:
         pathesController.pathSelectReset();
         TextCtrlCommand->SetFocus();
-        break;
-    default:
-        event.Skip();
-        break;
-    }
-}
-
-void search_directory_tool_wxFrame::OnCommandKeyDown(wxKeyEvent& event)
-{
-    long from, to;
-
-    switch (event.GetKeyCode())
-    {
-    case WXK_UP:
-        break;
-    case WXK_DOWN:
-        pathesController.selectNextPath();
-        break;
-    case WXK_RETURN:
-        break;
-    case WXK_BACK:
-        TextCtrlCommand->GetSelection(&from, &to);
-        if (from != to || TextCtrlCommand->GetInsertionPoint() != 0)
-            event.Skip();
-        break;
-    case WXK_DELETE:
-        TextCtrlCommand->GetSelection(&from, &to);
-        if (from != to || TextCtrlCommand->GetInsertionPoint() < (long long)(TextCtrlCommand->GetValue().Length()))
-            event.Skip();
-        break;
-    case WXK_TAB:
-        if (!TextCtrlCommand->GetValue().EndsWith("**"))
-        {
-            TextCtrlCommand->AppendText("*");
-        }
-        if (TextCtrlCommand->GetValue().EndsWith("**"))
-            TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 2);
-        else
-            TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 1);
         break;
     default:
         event.Skip();
@@ -342,41 +313,10 @@ void search_directory_tool_wxFrame::OnPathesKeyDown(wxKeyEvent& event)
         pathesController.selectNextPath();
         break;
     case WXK_TAB:
-        if (pathesController.getPathesCount() > 0 && pathesController.getSelectedPath() >= 0)
-        {
-            wxString path;
-            bool isDir;
-            pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
-            path = prepareDirFromPath(path, isDir);
-            path.Append("*");
-
-            if (parsed.argsSize() > 0)
-                parsed.setArg(0, path);
-            else
-                parsed.appendArg(path);
-
-            TextCtrlCommand->SetValue(parsed.toWxString());
-            TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 1);
-            TextCtrlCommand->SetFocus();
-        }
+        tryComplete();
         break;
     case WXK_RETURN:
-        if (pathesController.getPathesCount() > 0 &&
-            pathesController.getSelectedPath() >= 0 &&
-            currentChangerType != TerminalChangerType::None &&
-            winApiController.checkForegroundWindow() &&
-            winApiController.checkParentProcess())
-        {
-            wxString path;
-            bool isDir;
-            pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
-            path = prepareDirFromPath(path, isDir);
-
-            Hide();
-            winApiController.focusForegroundWindow();
-            changers[currentChangerType]->change_directory(path.ToStdWstring());
-            Close();
-        }
+        tryChangeDirectory();
         break;
     case WXK_BACK:
         pathesController.pathSelectReset();
@@ -387,6 +327,63 @@ void search_directory_tool_wxFrame::OnPathesKeyDown(wxKeyEvent& event)
         TextCtrlCommand->SetFocus();
         break;
     case WXK_DELETE:
+        break;
+    default:
+        event.Skip();
+        break;
+    }
+}
+
+void search_directory_tool_wxFrame::OnCommandKeyDown(wxKeyEvent& event)
+{
+    long from, to;
+
+    switch (event.GetKeyCode())
+    {
+    case WXK_UP:
+        break;
+    case WXK_DOWN:
+        pathesController.selectNextPath();
+        break;
+    case WXK_RETURN:
+        if (pathesController.getPathesCount() > 0 &&
+            currentChangerType != TerminalChangerType::None &&
+            winApiController.checkForegroundWindow() &&
+            winApiController.checkParentProcess())
+        {
+            wxString path;
+            bool isDir;
+            int iPath = pathesController.getSelectedPath();
+            if (iPath == -1)
+                iPath = 0;
+            pathesController.getPath(iPath, path, isDir);
+            path = prepareDirFromPath(path, isDir);
+
+            Hide();
+            winApiController.focusForegroundWindow();
+            changers[currentChangerType]->change_directory(path.ToStdWstring());
+            Close();
+        }
+        break;
+    case WXK_BACK:
+        TextCtrlCommand->GetSelection(&from, &to);
+        if (from != to || TextCtrlCommand->GetInsertionPoint() != 0)
+            event.Skip();
+        break;
+    case WXK_DELETE:
+        TextCtrlCommand->GetSelection(&from, &to);
+        if (from != to || TextCtrlCommand->GetInsertionPoint() < (long long)(TextCtrlCommand->GetValue().Length()))
+            event.Skip();
+        break;
+    case WXK_TAB:
+        if (!TextCtrlCommand->GetValue().EndsWith("**"))
+        {
+            TextCtrlCommand->AppendText("*");
+        }
+        if (TextCtrlCommand->GetValue().EndsWith("**"))
+            TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 2);
+        else
+            TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 1);
         break;
     default:
         event.Skip();
