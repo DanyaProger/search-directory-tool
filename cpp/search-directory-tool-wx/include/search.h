@@ -736,6 +736,9 @@ protected:
             }
         }
 
+        if (isAppendSlash && !fileTree.isDir(newNodeId))
+            return MatchResult::NoMatchAndFull;
+
         while (firstNotMatchedLinkedSequence < (long long)(linkedSequencesTypes.size()))
         {
             if (linkedSequencesTypes[firstNotMatchedLinkedSequence] == LinkedSequenceType::DoubleAsterisk)
@@ -748,11 +751,7 @@ protected:
             {
                 bool isDoubleAsterisk = firstNotMatchedLinkedSequence >= 1;
 
-                bool processResult;
-                if (isAppendSlash && !fileTree.isDir(newNodeId))
-                    processResult = false;
-                else
-                processResult = processLinkedSequence(linkedSequences[firstNotMatchedLinkedSequence],
+                bool processResult = processLinkedSequence(linkedSequences[firstNotMatchedLinkedSequence],
                                       newNodeId, newNodeLastMatchedChar, firstNotMatchedLinkedSequence, firstNotMatchedSequenceInLinkedSequence, nodeIdOfFirstSequenceInLinkedSequence,
                                       isDoubleAsterisk,
                                       firstNotMatchedLinkedSequence == (long long)linkedSequences.size() - 1,

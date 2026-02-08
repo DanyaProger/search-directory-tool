@@ -160,6 +160,7 @@ public:
     }
 
     void forceForegroundWindow(HWND hwnd) {
+        /* this trick doesn't work for cmd
         DWORD windowThreadProcessId = GetWindowThreadProcessId(GetForegroundWindow(),LPDWORD(0));
         DWORD currentThreadId = GetCurrentThreadId();
         DWORD CONST_SW_SHOW = 5;
@@ -167,6 +168,12 @@ public:
         BringWindowToTop(hwnd);
         ShowWindow(hwnd, CONST_SW_SHOW);
         AttachThreadInput(windowThreadProcessId,currentThreadId, false);
+        */
+        if (GetForegroundWindow() != foregroundWindowHandle)
+        {
+            SendMessageA(hwnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+            SendMessageA(hwnd, WM_SYSCOMMAND, SC_RESTORE, 0);
+        }
     }
 
     void focusForegroundWindow()
