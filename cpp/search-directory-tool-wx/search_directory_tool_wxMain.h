@@ -96,7 +96,20 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         long long exchangeVersion = -1;
         long MAX_PATHES_COUNT = 147;
         wxString exePath = wxStandardPaths::Get().GetExecutablePath();
-        CmdLineParser cmdLineParser = CmdLineParser(vector<CmdLineFlag>(), {CmdLineOption(true, "t", true, "time")});
+        CmdLineParser cmdLineParser = CmdLineParser({CmdLineFlag(false, "", true, "path"),
+                                     CmdLineFlag(false, "", true, "remove-path"),
+                                     CmdLineFlag(false, "", true, "fill-dirs.txt"),
+                                     CmdLineFlag(false, "", true, "parent"),
+                                     CmdLineFlag(true, "b", true, "bash"),
+                                     CmdLineFlag(true, "c", true, "cmd"),
+                                     CmdLineFlag(true, "e", true, "explorer"),
+                                     CmdLineFlag(true, "f", true, "far"),
+                                     CmdLineFlag(true, "p", true, "powershell"),
+                                     CmdLineFlag(true, "t", true, "totalcmd"),
+                                     CmdLineFlag(true, "h", true, "help"),
+                                     CmdLineFlag(false, "", true, "back")},
+                                    {CmdLineOption(false, "", true, "alias"),
+                                     CmdLineOption(false, "", true, "time")});
         CmdLineArgs parsed;
         int aliasPercentage, relativePercentage, absolutePercentage;
 
@@ -104,6 +117,7 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         WinApiController winApiController;
 
         TerminalChangerType currentChangerType;
+        TerminalChangerType forceChangerType = TerminalChangerType::None;
         map<TerminalChangerType, wxBitmap> bitmaps;
 
         map<TerminalChangerType, TerminalDirectoryChanger*> changers;

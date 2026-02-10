@@ -83,22 +83,22 @@ protected:
 
     FileTree fileTree;
 
-    void onSuccessMatch(wxString& currentPath, bool isDir)
+    virtual void onSuccessMatch(wxString& currentPath, bool isDir)
     {
         PathesExchange::pushPath(version, PathesExchange::Path(currentPath, isDir, false));
     }
 
-    void onPercentageChanged(int percentage)
+    virtual void onPercentageChanged(int percentage)
     {
         PathesExchange::pushPercentage(version, make_pair(pType, percentage));
     }
 
-    bool testDestroy()
+    virtual bool testDestroy()
     {
         return tHelper->GetThread()->TestDestroy();
     }
 
-    bool updateWorker()
+    virtual bool updateWorker()
     {
         return SdTokenExchange::updateWorker(version, sdToken, time);
     }
@@ -792,7 +792,7 @@ public:
 
 class BfsSearcher : public Searcher
 {
-private:
+protected:
     SearchExitCode bfs(wxString currentDir)
     {
         fileTree = FileTree();
@@ -803,6 +803,8 @@ private:
         long long currentDepthCount = 0;
         long long nextDepthCount = 0;
         PercentageCalculator percentageCalculator;
+
+        clock_t startTime = clock();
 
         while (!allFilesIds.empty())
         {
@@ -877,6 +879,9 @@ private:
                     allFilesIds.push(nodeId);
                 }
             }
+
+            if ((clock() - startTime) / 1000.0 > time)
+                break;
         }
 
         if (currentDepthCount != 0)
@@ -1012,9 +1017,9 @@ private:
 
     bool absolutePathSearchPrepare(wxString sdToken, wxString& currentDir, wxString& preparedSdToken)
     {
-        wregex re(L"[A-Za-z]:[\\\\/]");
+        wregex re(L"[A-Za-z]:(([\\\\/])|(\\*\\*)).*");
         wsmatch m;
-        if (sdToken.Length() >= 3 && regex_match(sdToken.SubString(0, 2).ToStdWstring(), m, re))
+        if (regex_match(sdToken.ToStdWstring(), m, re))
         {
             currentDir = sdToken.SubString(0, 1);
             preparedSdToken = sdToken.SubString(2, sdToken.Length() - 1);
@@ -1085,6 +1090,46 @@ public:
         }
 
         return SearchExitCode::Success;
+    }
+};
+
+class TerminalBfsSearcher : public BfsSearcher
+{
+private:
+    PathesExchange::Path result = PathesExchange::Path("", false, false);
+    bool foundResult = false;
+protected:
+    void onSuccessMatch(wxString& currentPath, bool isDir) override
+    {
+        foundResult = true;
+        result = PathesExchange::Path(currentPath, isDir, false);
+    }
+
+    void onPercentageChanged(int percentage) override
+    {
+    }
+
+    bool testDestroy() override
+    {
+        if (foundResult)
+            return true;
+        else
+            return false;
+    }
+
+    bool updateWorker() override
+    {
+        return false;
+    }
+public:
+    PathesExchange::Path getResult()
+    {
+        return result;
+    }
+
+    bool isResult()
+    {
+        return foundResult;
     }
 };
 

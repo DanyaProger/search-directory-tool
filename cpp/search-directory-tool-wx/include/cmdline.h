@@ -290,7 +290,7 @@ public:
 
         int argc = argv.size();
 
-        for (int i = 0; i < argc; i++)
+        for (int i = 1; i < argc; i++)
         {
             wxString arg(argv[i]);
             if (arg.StartsWith(wxString("--")) || arg.StartsWith(wxString("-")))

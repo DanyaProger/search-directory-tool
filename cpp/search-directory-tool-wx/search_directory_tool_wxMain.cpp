@@ -249,19 +249,36 @@ void search_directory_tool_wxFrame::tryComplete()
 void search_directory_tool_wxFrame::tryChangeDirectory()
 {
     if (pathesController.getPathesCount() > 0 &&
-            pathesController.getSelectedPath() >= 0 &&
-            currentChangerType != TerminalChangerType::None &&
+            (currentChangerType != TerminalChangerType::None || forceChangerType != TerminalChangerType::None) &&
             winApiController.checkForegroundWindow() &&
             winApiController.checkParentProcess())
     {
         wxString path;
         bool isDir;
-        pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
+        int iPath = pathesController.getSelectedPath();
+        if (iPath == -1)
+            iPath = 0;
+        pathesController.getPath(iPath, path, isDir);
         path = prepareDirFromPath(path, isDir);
 
         Hide();
         winApiController.focusForegroundWindow();
-        changers[currentChangerType]->change_directory(path.ToStdWstring());
+
+        wxString dirsPath = exePath.BeforeLast('\\');
+        dirsPath.Append("\\dirs.txt");
+        RecordsDispatcher dirs(dirsPath.ToStdWstring());
+        dirs.load_dirs();
+        if (parsed.isOption("alias"))
+        {
+            dirs.update_record_with_path_and_alias(path.ToStdWstring(), parsed.getOption("alias").ToStdWstring());
+        }
+        dirs.set_variable(L"back", wxFileName::GetCwd().ToStdWstring());
+        dirs.save_dirs();
+        if (forceChangerType != TerminalChangerType::None)
+            changers[forceChangerType]->change_directory(path.ToStdWstring());
+        else
+            changers[currentChangerType]->change_directory(path.ToStdWstring());
+
         Close();
     }
 }
@@ -346,24 +363,7 @@ void search_directory_tool_wxFrame::OnCommandKeyDown(wxKeyEvent& event)
         pathesController.selectNextPath();
         break;
     case WXK_RETURN:
-        if (pathesController.getPathesCount() > 0 &&
-            currentChangerType != TerminalChangerType::None &&
-            winApiController.checkForegroundWindow() &&
-            winApiController.checkParentProcess())
-        {
-            wxString path;
-            bool isDir;
-            int iPath = pathesController.getSelectedPath();
-            if (iPath == -1)
-                iPath = 0;
-            pathesController.getPath(iPath, path, isDir);
-            path = prepareDirFromPath(path, isDir);
-
-            Hide();
-            winApiController.focusForegroundWindow();
-            changers[currentChangerType]->change_directory(path.ToStdWstring());
-            Close();
-        }
+        tryChangeDirectory();
         break;
     case WXK_BACK:
         TextCtrlCommand->GetSelection(&from, &to);
@@ -436,8 +436,7 @@ void search_directory_tool_wxFrame::OnTextCtrlCommandText(wxCommandEvent& event)
 
         pathesController.clear();
 
-        double time = SdTokenExchange::DEFAULT_TIME;
-        wxString sdToken;
+        double time = numeric_limits<double>::infinity();
         parsed = cmdLineParser.parseWithOneArg(TextCtrlCommand->GetValue());
         if (parsed.isOption("time"))
         {
@@ -445,11 +444,54 @@ void search_directory_tool_wxFrame::OnTextCtrlCommandText(wxCommandEvent& event)
             wchar_t* e;
             time = wcstod(timeStr, &e);
             if (e - timeStr.c_str() != timeStr.length())
-                time = SdTokenExchange::DEFAULT_TIME;
+                time = numeric_limits<double>::infinity();
         }
-        if (parsed.argsSize() == 1)
-            sdToken = parsed.arg(0);
-        SdTokenExchange::pushSdToken(exchangeVersion, sdToken, time);
+        forceChangerType = TerminalChangerType::None;
+        if (parsed.isFlag("bash"))
+        {
+            forceChangerType = TerminalChangerType::Bash;
+        }
+        if (parsed.isFlag("cmd"))
+        {
+            forceChangerType = TerminalChangerType::Cmd;
+        }
+        if (parsed.isFlag("explorer"))
+        {
+            forceChangerType = TerminalChangerType::Explorer;
+        }
+        if (parsed.isFlag("far"))
+        {
+            forceChangerType = TerminalChangerType::Far;
+        }
+        if (parsed.isFlag("powershell"))
+        {
+            forceChangerType = TerminalChangerType::Powershell;
+        }
+        if (parsed.isFlag("totalcmd"))
+        {
+            forceChangerType = TerminalChangerType::TotalCommander;
+        }
+        if (parsed.isFlag("back"))
+        {
+            wxString dirsPath = exePath.BeforeLast('\\');
+            dirsPath.Append("\\dirs.txt");
+            RecordsDispatcher dirs(dirsPath.ToStdWstring());
+            dirs.load_dirs();
+            wstring prev_path;
+            if (dirs.get_variable(L"back", prev_path))
+            {
+                pathesController.appendPath(prev_path, true);
+            }
+        }
+        else
+        {
+            wxString sdToken;
+            if (parsed.argsSize() == 1)
+                sdToken = parsed.arg(0);
+            else
+                sdToken = "";
+            SdTokenExchange::pushSdToken(exchangeVersion, sdToken, time);
+        }
     }
 }
 
