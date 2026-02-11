@@ -163,25 +163,25 @@ private:
     vector<CmdLineFlag> possibleFlags;
     vector<CmdLineOption> possibleOptions;
 
-    int findInFlags(wxString flagName)
+    int findInFlags(wxString flagName, bool isShort)
     {
         for (int i = 0; i < (int)possibleFlags.size(); i++)
         {
             CmdLineFlag f = possibleFlags[i];
-            if ((f.fShort && f.shortName.IsSameAs(flagName)) ||
-                (f.fLong && f.longName.IsSameAs(flagName)))
+            if ((isShort && f.fShort && f.shortName.IsSameAs(flagName)) ||
+                (!isShort && f.fLong && f.longName.IsSameAs(flagName)))
                 return i;
         }
         return -1;
     }
 
-    int findInOptions(wxString optionName)
+    int findInOptions(wxString optionName, bool isShort)
     {
         for (int i = 0; i < (int)possibleOptions.size(); i++)
         {
             CmdLineOption o = possibleOptions[i];
-            if ((o.oShort && o.shortName.IsSameAs(optionName)) ||
-                (o.oLong && o.longName.IsSameAs(optionName)))
+            if ((isShort && o.oShort && o.shortName.IsSameAs(optionName)) ||
+                (!isShort && o.oLong && o.longName.IsSameAs(optionName)))
                 return i;
         }
         return -1;
@@ -307,7 +307,7 @@ public:
                     trimmedArg = arg.SubString(1, arg.Len() - 1);
                     isShort = true;
                 }
-                int pos = findInFlags(trimmedArg);
+                int pos = findInFlags(trimmedArg, isShort);
                 if (pos != -1)
                 {
                     CmdLineFlag flag = possibleFlags[pos];
@@ -317,7 +317,7 @@ public:
                 }
                 else
                 {
-                    pos = findInOptions(trimmedArg);
+                    pos = findInOptions(trimmedArg, isShort);
                     if (pos != -1 && i != argc - 1)
                     {
                         CmdLineOption o = possibleOptions[pos];
@@ -374,7 +374,7 @@ public:
                     isShort = true;
                 }
 
-                int pos = findInFlags(trimmedToken);
+                int pos = findInFlags(trimmedToken, isShort);
                 int iOptionValue;
                 if (pos != -1)
                 {
@@ -383,7 +383,7 @@ public:
                     flags.push_back(flag);
                     flagsAndOptions.push_back(FlagOrOption::Flag);
                 }
-                else if ((pos = findInOptions(trimmedToken)) != -1 &&
+                else if ((pos = findInOptions(trimmedToken, isShort)) != -1 &&
                          (iOptionValue = findNextNotDelimeterToken(isDelimeterToken, i + 1)) != -1)
                 {
                     CmdLineOption option = possibleOptions[pos];

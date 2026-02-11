@@ -1,12 +1,3 @@
-/***************************************************************
- * Name:      search_directory_tool_wxMain.h
- * Purpose:   Defines Application Frame
- * Author:    Danila Maiseyenkau ()
- * Created:   2025-10-13
- * Copyright: Danila Maiseyenkau ()
- * License:
- **************************************************************/
-
 #ifndef SEARCH_DIRECTORY_TOOL_WXMAIN_H
 #define SEARCH_DIRECTORY_TOOL_WXMAIN_H
 
@@ -29,6 +20,8 @@
 #include <wx/stdpaths.h>
 #include <wx/valtext.h>
 
+#include "search_directory_tool_wxHelp.h"
+#include "search_directory_tool_wxParent.h"
 #include "include/concurrency.h"
 #include "include/cmdline.h"
 #include "include/search.h"
@@ -70,6 +63,7 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         void selectPathWithMouse();
         void tryComplete();
         void tryChangeDirectory();
+        bool doOperations();
 
         //(*Identifiers(search_directory_tool_wxFrame)
         static const wxWindowID ID_STATICTEXTSD;
@@ -93,6 +87,10 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         wxTimer Timer1;
         //*)
 
+        HelpDialog* helpDialogRu = NULL;
+        HelpDialog* helpDialogEn = NULL;
+        ParentDialog* parentDialog = NULL;
+
         long long exchangeVersion = -1;
         long MAX_PATHES_COUNT = 147;
         wxString exePath = wxStandardPaths::Get().GetExecutablePath();
@@ -106,7 +104,8 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
                                      CmdLineFlag(true, "f", true, "far"),
                                      CmdLineFlag(true, "p", true, "powershell"),
                                      CmdLineFlag(true, "t", true, "totalcmd"),
-                                     CmdLineFlag(true, "h", true, "help"),
+                                     CmdLineFlag(false, "", true, "help"),
+                                     CmdLineFlag(false, "", true, "help-en"),
                                      CmdLineFlag(false, "", true, "back")},
                                     {CmdLineOption(false, "", true, "alias"),
                                      CmdLineOption(false, "", true, "time")});

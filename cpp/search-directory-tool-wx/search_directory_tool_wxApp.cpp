@@ -1,12 +1,3 @@
-/***************************************************************
- * Name:      search_directory_tool_wxApp.cpp
- * Purpose:   Code for Application Class
- * Author:    Danila Maiseyenkau ()
- * Created:   2025-10-13
- * Copyright: Danila Maiseyenkau ()
- * License:
- **************************************************************/
-
 #include "search_directory_tool_wxApp.h"
 
 //(*AppHeaders
@@ -67,7 +58,13 @@ int search_directory_tool_wxApp::OnRun()
         CmdLineArgs parsed = cmdLineParser.parse(wxApp::argv.GetArguments());
         if (parsed.isFlag("help"))
         {
-
+            HelpDialog helpDialog("sd help ru");
+            helpDialog.ShowModal();
+        }
+        else if (parsed.isFlag("help-en"))
+        {
+            HelpDialog helpDialog("sd help en");
+            helpDialog.ShowModal();
         }
         else if (parsed.isFlag("path"))
         {
@@ -79,10 +76,14 @@ int search_directory_tool_wxApp::OnRun()
         }
         else if (parsed.isFlag("fill-dirs.txt"))
         {
-
+            winApiController.fillDirsTxt();
         }
         else if (parsed.isFlag("parent"))
         {
+            DWORD pid = winApiController.getParentProcessId(GetCurrentProcessId());
+            wxString fileName = winApiController.getProcessName(pid);
+            ParentDialog parentDialog(pid, fileName);
+            parentDialog.ShowModal();
         }
         else
         {
@@ -131,6 +132,8 @@ int search_directory_tool_wxApp::OnRun()
                 if (e - timeStr.c_str() != timeStr.length())
                     time = 3;
             }
+
+            winApiController.saveForegroundWindow();
             if (cType == TerminalChangerType::None)
                 cType = winApiController.getParentProcessType();
             if (cType != TerminalChangerType::None)
@@ -146,6 +149,11 @@ int search_directory_tool_wxApp::OnRun()
                     {
                         wxString cwd = wxFileName::GetCwd();
                         dirs.set_variable(L"back", cwd.ToStdWstring());
+                        if (isAlias)
+                        {
+                            dirs.update_record_with_path_and_alias(prev_path, parsed.getOption("alias").ToStdWstring());
+                        }
+                        winApiController.focusForegroundWindow();
                         changers[cType]->change_directory(prev_path);
                     }
                     dirs.save_dirs();
@@ -156,7 +164,7 @@ int search_directory_tool_wxApp::OnRun()
                     wxString sdToken = parsed.argsSize() == 0 ? "" : parsed.arg(0);
                     long long version = -1;
                     searcher.search(sdToken, version, time, nullptr);
-                    if (searcher.isResult())
+                    if (searcher.isResult() && winApiController.checkForegroundWindow() && winApiController.checkParentProcess())
                     {
                         dir = prepareDirFromPath1(searcher.getResult().fullPath, searcher.getResult().isDir);
                         wxString dirsPath = wxStandardPaths::Get().GetExecutablePath().BeforeLast('\\');
@@ -169,6 +177,7 @@ int search_directory_tool_wxApp::OnRun()
                         }
                         dirs.set_variable(L"back", wxFileName::GetCwd().ToStdWstring());
                         dirs.save_dirs();
+                        winApiController.focusForegroundWindow();
                         changers[cType]->change_directory(dir.ToStdWstring());
                     }
                 }

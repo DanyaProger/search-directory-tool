@@ -173,6 +173,7 @@ void ExplorerDirectoryChanger::change_directory(wstring path)
     else
         commandLine = to_wstring(pid) + L" -d " + to_wstring(get_delay())
                          + L" -kd " + to_wstring(VK_CONTROL) + L" -kd " + to_wstring(int('L')) + L" -ku " + to_wstring(VK_CONTROL) + L" -ku " + to_wstring(int('L'))
+                         + L" -kd " + to_wstring(VK_CONTROL) + L" -kd " + to_wstring(int('A')) + L" -ku " + to_wstring(VK_CONTROL) + L" -ku " + to_wstring(int('A'))
                          + L" -t " + prepared_command + L" -kd " + to_wstring(VK_RETURN) + L" -ku " + to_wstring(VK_RETURN);
     wstring terminal_sender = (EXE_DIR/L"terminal-sender"/L"terminal-sender.exe").wstring();
     commandLine = terminal_sender + L" " + commandLine;

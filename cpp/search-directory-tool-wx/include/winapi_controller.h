@@ -2,12 +2,14 @@
 #define WINAPI_CONTROLLER_H_INCLUDED
 
 #include <wx/string.h>
+#include <wx/stdpaths.h>
 #include <string>
 #include <windows.h>
 #include <tlhelp32.h>
 #include <psapi.h>
 
 #include "types.h"
+#include "RecordsDispatcher.h"
 #include "InputSimulator.h"
 
 using namespace std;
@@ -110,7 +112,7 @@ public:
         DWORD parentPid = getParentProcessId(currentPid);
         wxString parentName = getProcessName(parentPid).Lower();
         wxString commanderExe;
-        if (wxGetEnv("COMMANDER_EXE", &commanderExe) && wxFileName(commanderExe).GetFullName().IsSameAs(parentName))
+        if (wxGetEnv("COMMANDER_EXE", &commanderExe) && wxFileName(commanderExe).GetFullName().Lower().IsSameAs(parentName))
             return TerminalChangerType::TotalCommander;
         else if (parentName.IsSameAs("bash.exe"))
             return TerminalChangerType::Bash;
@@ -420,6 +422,56 @@ public:
             BringWindowToTop(aTargetWindow);
         }
         return new_foreground_wnd;
+    }
+
+    void fillDirsTxt()
+    {
+        wxString sdDir = wxStandardPaths::Get().GetExecutablePath().BeforeLast('\\');
+        wxString dirsPath = sdDir;
+        dirsPath.Append("\\dirs.txt");
+        RecordsDispatcher dirs(dirsPath.ToStdWstring());
+        dirs.load_dirs();
+
+        dirs.update_record_with_path_and_alias(sdDir.ToStdWstring(), L"sd");
+
+        wxString userProfile;
+        if (wxGetEnv("USERPROFILE", &userProfile))
+        {
+            dirs.update_record_with_path_and_alias(userProfile.ToStdWstring(), L"home");
+            wxString downloads = userProfile + "\\Downloads";
+            dirs.update_record_with_path_and_alias(downloads.ToStdWstring(), L"loads");
+            wxString documents = userProfile + "\\Documents";
+            dirs.update_record_with_path_and_alias(documents.ToStdWstring(), L"doc");
+            wxString music = userProfile + "\\Music";
+            dirs.update_record_with_path_and_alias(music.ToStdWstring(), L"music");
+            wxString pictures = userProfile + "\\Pictures";
+            dirs.update_record_with_path_and_alias(pictures.ToStdWstring(), L"pic");
+            wxString videos = userProfile + "\\Videos";
+            dirs.update_record_with_path_and_alias(videos.ToStdWstring(), L"videos");
+        }
+
+        dirs.update_record_with_path_and_alias(L"C:\\", L"c");
+        dirs.update_record_with_path_and_alias(L"D:\\", L"d");
+        dirs.update_record_with_path_and_alias(L"E:\\", L"e");
+        dirs.update_record_with_path_and_alias(L"F:\\", L"f");
+
+        wxString windows;
+        if (wxGetEnv("WINDIR", &windows))
+        {
+            dirs.update_record_with_path_and_alias(windows.ToStdWstring(), L"win");
+        }
+        wxString programFiles;
+        if (wxGetEnv("PROGRAMFILES", &programFiles))
+        {
+            dirs.update_record_with_path_and_alias(programFiles.ToStdWstring(), L"pf");
+        }
+        wxString programFiles86;
+        if (wxGetEnv("PROGRAMFILES(x86)", &programFiles86))
+        {
+            dirs.update_record_with_path_and_alias(programFiles86.ToStdWstring(), L"pf86");
+        }
+
+        dirs.save_dirs();
     }
 };
 

@@ -53,8 +53,15 @@ public:
         for (size_t i = 0; i < directories.size(); i++)
         {
             filesystem::path current_path(directories[i].full_path);
-            if (directories[i].alias.rfind(VARIABLE_PREFIX, 0) != 0 && filesystem::exists(updated_path) && filesystem::exists(current_path) && filesystem::equivalent(updated_path, current_path))
-                index = i;
+            try
+            {
+                if (directories[i].alias.rfind(VARIABLE_PREFIX, 0) != 0 && filesystem::exists(updated_path) && filesystem::exists(current_path) && filesystem::equivalent(updated_path, current_path))
+                    index = i;
+            }
+            catch (std::filesystem::filesystem_error const& ex)
+            {
+                return;
+            }
         }
 
         for (size_t i = 0; i < directories.size(); i++)

@@ -1,14 +1,4 @@
-/***************************************************************
- * Name:      search_directory_tool_wxMain.cpp
- * Purpose:   Code for Application Frame
- * Author:    Danila Maiseyenkau ()
- * Created:   2025-10-13
- * Copyright: Danila Maiseyenkau ()
- * License:
- **************************************************************/
-
 #include "search_directory_tool_wxMain.h"
-#include "search_directory_tool_wxApp.h"
 
 //(*InternalHeaders(search_directory_tool_wxFrame)
 #include <wx/font.h>
@@ -203,6 +193,24 @@ void search_directory_tool_wxFrame::OnQuit(wxCommandEvent& event)
 
 void search_directory_tool_wxFrame::OnClose(wxCloseEvent& event)
 {
+    if (helpDialogEn != NULL)
+    {
+        helpDialogEn->Close();
+        helpDialogEn->Destroy();
+        helpDialogEn = NULL;
+    }
+    if (helpDialogRu != NULL)
+    {
+        helpDialogRu->Close();
+        helpDialogRu->Destroy();
+        helpDialogRu = NULL;
+    }
+    if (parentDialog != NULL)
+    {
+        parentDialog->Close();
+        parentDialog->Destroy();
+        parentDialog = NULL;
+    }
     if (GetThread() &&
         GetThread()->IsRunning())
             GetThread()->Delete();
@@ -244,6 +252,29 @@ void search_directory_tool_wxFrame::tryComplete()
         TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 1);
         TextCtrlCommand->SetFocus();
     }
+}
+
+bool search_directory_tool_wxFrame::doOperations()
+{
+    if (parsed.isFlag("path"))
+    {
+        winApiController.addSdDirectoryToPath();
+        Close();
+        return true;
+    }
+    if (parsed.isFlag("remove-path"))
+    {
+        winApiController.removeSdDirectoryFromPath();
+        Close();
+        return true;
+    }
+    if (parsed.isFlag("fill-dirs.txt"))
+    {
+        winApiController.fillDirsTxt();
+        Close();
+        return true;
+    }
+    return false;
 }
 
 void search_directory_tool_wxFrame::tryChangeDirectory()
@@ -300,7 +331,8 @@ void search_directory_tool_wxFrame::OnKeyDown(wxKeyEvent& event)
         tryComplete();
         break;
     case WXK_RETURN:
-        tryChangeDirectory();
+        if (!doOperations())
+            tryChangeDirectory();
         break;
     case WXK_BACK:
         pathesController.pathSelectReset();
@@ -333,7 +365,8 @@ void search_directory_tool_wxFrame::OnPathesKeyDown(wxKeyEvent& event)
         tryComplete();
         break;
     case WXK_RETURN:
-        tryChangeDirectory();
+        if (!doOperations())
+            tryChangeDirectory();
         break;
     case WXK_BACK:
         pathesController.pathSelectReset();
@@ -363,7 +396,8 @@ void search_directory_tool_wxFrame::OnCommandKeyDown(wxKeyEvent& event)
         pathesController.selectNextPath();
         break;
     case WXK_RETURN:
-        tryChangeDirectory();
+        if (!doOperations())
+            tryChangeDirectory();
         break;
     case WXK_BACK:
         TextCtrlCommand->GetSelection(&from, &to);
@@ -438,6 +472,56 @@ void search_directory_tool_wxFrame::OnTextCtrlCommandText(wxCommandEvent& event)
 
         double time = numeric_limits<double>::infinity();
         parsed = cmdLineParser.parseWithOneArg(TextCtrlCommand->GetValue());
+        if (parsed.isFlag("help"))
+        {
+            if (helpDialogRu != NULL && helpDialogRu->isClosed())
+            {
+                helpDialogRu->Destroy();
+                helpDialogRu = NULL;
+            }
+            if (helpDialogRu != NULL && !(helpDialogRu->isClosed()))
+            {
+
+            } else
+            {
+                helpDialogRu = new HelpDialog(L"sd help ru");
+                helpDialogRu->Show();
+            }
+        }
+        if (parsed.isFlag("help-en"))
+        {
+            if (helpDialogEn != NULL && helpDialogEn->isClosed())
+            {
+                helpDialogEn->Destroy();
+                helpDialogEn = NULL;
+            }
+            if (helpDialogEn != NULL && !helpDialogEn->isClosed())
+            {
+
+            } else
+            {
+                helpDialogEn = new HelpDialog(L"sd help en");
+                helpDialogEn->Show();
+            }
+        }
+        if (parsed.isFlag("parent"))
+        {
+            if (parentDialog != NULL && parentDialog->isClosed())
+            {
+                parentDialog->Destroy();
+                parentDialog = NULL;
+            }
+            if (parentDialog != NULL && !parentDialog->isClosed())
+            {
+
+            } else
+            {
+                DWORD pid = winApiController.getParentProcessId(GetCurrentProcessId());
+                wxString fileName = winApiController.getProcessName(pid);
+                parentDialog = new ParentDialog(pid, fileName);
+                parentDialog->Show();
+            }
+        }
         if (parsed.isOption("time"))
         {
             wxString timeStr = parsed.getOption("time");

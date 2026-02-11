@@ -1,12 +1,3 @@
-/***************************************************************
- * Name:      search_directory_tool_wxApp.h
- * Purpose:   Defines Application Class
- * Author:    Danila Maiseyenkau ()
- * Created:   2025-10-13
- * Copyright: Danila Maiseyenkau ()
- * License:
- **************************************************************/
-
 #ifndef SEARCH_DIRECTORY_TOOL_WXAPP_H
 #define SEARCH_DIRECTORY_TOOL_WXAPP_H
 
@@ -14,6 +5,8 @@
 
 #include <wx/app.h>
 
+#include "search_directory_tool_wxParent.h"
+#include "search_directory_tool_wxHelp.h"
 #include "include/search.h"
 #include "include/cmdline.h"
 #include "include/winapi_controller.h"
@@ -37,7 +30,8 @@ class search_directory_tool_wxApp : public wxApp
                                      CmdLineFlag(true, "f", true, "far"),
                                      CmdLineFlag(true, "p", true, "powershell"),
                                      CmdLineFlag(true, "t", true, "totalcmd"),
-                                     CmdLineFlag(true, "h", true, "help"),
+                                     CmdLineFlag(false, "", true, "help"),
+                                     CmdLineFlag(false, "", true, "help-en"),
                                      CmdLineFlag(false, "", true, "back")},
                                     {CmdLineOption(false, "", true, "alias"),
                                      CmdLineOption(false, "", true, "time")});
