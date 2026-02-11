@@ -126,10 +126,10 @@
 		</Unit>
 		<Unit filename="search_directory_tool_wxApp.cpp" />
 		<Unit filename="search_directory_tool_wxApp.h" />
-		<Unit filename="search_directory_tool_wxFunctions.h" />
 		<Unit filename="search_directory_tool_wxHelp.h" />
 		<Unit filename="search_directory_tool_wxMain.cpp" />
 		<Unit filename="search_directory_tool_wxMain.h" />
+		<Unit filename="search_directory_tool_wxParent.h" />
 		<Unit filename="wxsmith/search_directory_tool_wxframe.wxs" />
 		<Extensions>
 			<wxsmith version="1">

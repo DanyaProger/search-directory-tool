@@ -128,6 +128,7 @@ LR"(Программа sd - альтернативный способ поиск
 1) открыть папку с sd.exe
 2) запустить "sd --path"
 3) запустить "sd --fill-dirs.txt"
+4) перезапустить приложение, в котором выполнялись предыдущие шаги
 
 Удаление программы:
 1) запустить "sd --remove-path"
@@ -222,6 +223,7 @@ Program setup:
 1) open folder with sd.exe
 2) run "sd --path"
 3) run "sd --fill-dirs.txt"
+4) restart application where previous steps were performed
 
 Program uninstall:
 1) run "sd --remove-path"
