@@ -114,6 +114,8 @@ public:
         wxString commanderExe;
         if (wxGetEnv("COMMANDER_EXE", &commanderExe) && wxFileName(commanderExe).GetFullName().Lower().IsSameAs(parentName))
             return TerminalChangerType::TotalCommander;
+        else if (parentName.IsSameAs("totalcmd.exe") || parentName.IsSameAs("totalcmd64.exe"))
+            return TerminalChangerType::TotalCommander;
         else if (parentName.IsSameAs("bash.exe"))
             return TerminalChangerType::Bash;
         else if (parentName.IsSameAs("cmd.exe"))

@@ -12,6 +12,10 @@
 		<Project filename="DirectoryChangers/DirectoryChangers.cbp" />
 		<Project filename="InputSimulator/InputSimulator.cbp" />
 		<Project filename="RecordsDispatcher/RecordsDispatcher.cbp" />
-		<Project filename="tests/tests.cbp" />
+		<Project filename="tests/tests.cbp">
+			<Depends filename="DirectoryChangers/DirectoryChangers.cbp" />
+			<Depends filename="InputSimulator/InputSimulator.cbp" />
+			<Depends filename="RecordsDispatcher/RecordsDispatcher.cbp" />
+		</Project>
 	</Workspace>
 </CodeBlocks_workspace_file>

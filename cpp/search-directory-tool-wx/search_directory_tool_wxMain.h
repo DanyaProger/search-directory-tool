@@ -64,6 +64,7 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         void tryComplete();
         void tryChangeDirectory();
         bool doOperations();
+        void chooseBitmap(TerminalChangerType changer);
 
         //(*Identifiers(search_directory_tool_wxFrame)
         static const wxWindowID ID_STATICTEXTSD;
@@ -117,6 +118,7 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
 
         TerminalChangerType currentChangerType;
         TerminalChangerType forceChangerType = TerminalChangerType::None;
+        TerminalChangerType choosenBitmap;
         map<TerminalChangerType, wxBitmap> bitmaps;
 
         map<TerminalChangerType, TerminalDirectoryChanger*> changers;
@@ -125,7 +127,7 @@ class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
         ExplorerDirectoryChanger explorerChanger = ExplorerDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring(), true);
         FarDirectoryChanger farChanger = FarDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
         PowerShellDirectoryChanger powershellChanger = PowerShellDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
-        TotalCommanderDirectoryChanger totalCommanderChanger;
+        TotalCommanderDirectoryChanger totalCommanderChanger = TotalCommanderDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
 
     public:
 

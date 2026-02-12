@@ -97,10 +97,12 @@ search_directory_tool_wxFrame::search_directory_tool_wxFrame(wxWindow* parent,wx
 
     winApiController.saveForegroundWindow();
     currentChangerType = TerminalChangerType::None;
+    choosenBitmap = TerminalChangerType::None;
+    ParentIconBitmap->SetBitmap(wxBitmapBundle::FromBitmap(bitmaps[choosenBitmap]));
     if (winApiController.checkForegroundWindow())
     {
         currentChangerType = winApiController.getParentProcessType();
-        ParentIconBitmap->SetBitmap(wxBitmapBundle::FromBitmap(bitmaps[currentChangerType]));
+        chooseBitmap(currentChangerType);
     }
 
     changers[TerminalChangerType::Bash] = &bashChanger;
@@ -555,6 +557,13 @@ void search_directory_tool_wxFrame::OnTextCtrlCommandText(wxCommandEvent& event)
         {
             forceChangerType = TerminalChangerType::TotalCommander;
         }
+        if (forceChangerType != TerminalChangerType::None)
+        {
+            chooseBitmap(forceChangerType);
+        } else
+        {
+            chooseBitmap(currentChangerType);
+        }
         if (parsed.isFlag("back"))
         {
             wxString dirsPath = exePath.BeforeLast('\\');
@@ -610,28 +619,37 @@ void search_directory_tool_wxFrame::OnTimer1Trigger(wxTimerEvent& event)
     }
 }
 
- void search_directory_tool_wxFrame::setPercentage(pair<PercentageType, int> percentage)
- {
-     wxString value;
-     if (percentage.second == -1)
+void search_directory_tool_wxFrame::setPercentage(pair<PercentageType, int> percentage)
+{
+    wxString value;
+    if (percentage.second == -1)
         value = "-%";
-     else if (percentage.second == -2)
+    else if (percentage.second == -2)
         value = "partial";
-     else
+    else
         value = to_string(percentage.second) + "%";
-     switch (percentage.first)
-     {
-     case PercentageType::Alias:
-         StatusBar1->SetStatusText("alias " + value, 0);
-         aliasPercentage = percentage.second;
-         break;
-     case PercentageType::Relative:
-         StatusBar1->SetStatusText("relative " + value, 1);
-         relativePercentage = percentage.second;
-         break;
-     case PercentageType::Absolute:
-         StatusBar1->SetStatusText("absolute " + value, 2);
-         absolutePercentage = percentage.second;
-         break;
-     }
- }
+    switch (percentage.first)
+    {
+    case PercentageType::Alias:
+        StatusBar1->SetStatusText("alias " + value, 0);
+        aliasPercentage = percentage.second;
+        break;
+    case PercentageType::Relative:
+        StatusBar1->SetStatusText("relative " + value, 1);
+        relativePercentage = percentage.second;
+        break;
+    case PercentageType::Absolute:
+        StatusBar1->SetStatusText("absolute " + value, 2);
+        absolutePercentage = percentage.second;
+        break;
+    }
+}
+
+void search_directory_tool_wxFrame::chooseBitmap(TerminalChangerType changer)
+{
+    if (changer != choosenBitmap)
+    {
+        choosenBitmap = changer;
+        ParentIconBitmap->SetBitmap(wxBitmapBundle::FromBitmap(bitmaps[choosenBitmap]));
+    }
+}

@@ -41,7 +41,7 @@ class search_directory_tool_wxApp : public wxApp
         ExplorerDirectoryChanger explorerChanger = ExplorerDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring(), false);
         FarDirectoryChanger farChanger = FarDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
         PowerShellDirectoryChanger powershellChanger = PowerShellDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
-        TotalCommanderDirectoryChanger totalCommanderChanger;
+        TotalCommanderDirectoryChanger totalCommanderChanger = TotalCommanderDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
 
         WinApiController winApiController;
 };

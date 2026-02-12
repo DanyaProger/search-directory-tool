@@ -59,6 +59,7 @@ class TotalCommanderDirectoryChanger : public TerminalDirectoryChanger
 {
 public:
     TotalCommanderDirectoryChanger();
+    TotalCommanderDirectoryChanger(wstring exe_path);
 
     wstring path_to_cd_command(wstring path) override;
 
