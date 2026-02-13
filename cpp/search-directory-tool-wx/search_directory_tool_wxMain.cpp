@@ -239,16 +239,30 @@ void search_directory_tool_wxFrame::tryComplete()
 {
     if (pathesController.getPathesCount() > 0 && pathesController.getSelectedPath() >= 0)
     {
-        wxString path;
-        bool isDir;
-        pathesController.getPath(pathesController.getSelectedPath(), path, isDir);
-        path = prepareDirFromPath(path, isDir);
-        path.Append("*");
+        PathesExchange::Path path = pathesController.getPath(pathesController.getSelectedPath());
+        path.fullPath = prepareDirFromPath(path.fullPath, path.isDir);
+        wxFileName dir = wxFileName::DirName(path.fullPath);
+        switch (path.type)
+        {
+        case PercentageType::Alias:
+                dir.MakeRelativeTo(path.basePath);
+                path.fullPath = path.alias + "\\" + (dir.GetFullPath().IsSameAs(".") || dir.GetFullPath().IsSameAs(".\\") ? "" : dir.GetFullPath());
+                break;
+        case PercentageType::Relative:
+                dir.MakeRelativeTo(path.basePath);
+                path.fullPath = ".\\" + (dir.GetFullPath().IsSameAs(".") || dir.GetFullPath().IsSameAs(".\\") ? "" : dir.GetFullPath());
+                break;
+        case PercentageType::Absolute:
+                break;
+        }
+        if (!path.fullPath.EndsWith("\\"))
+            path.fullPath.Append("\\");
+        path.fullPath.Append("*");
 
         if (parsed.argsSize() > 0)
-            parsed.setArg(0, path);
+            parsed.setArg(0, path.fullPath);
         else
-            parsed.appendArg(path);
+            parsed.appendArg(path.fullPath);
 
         TextCtrlCommand->SetValue(parsed.toWxString());
         TextCtrlCommand->SetInsertionPoint(TextCtrlCommand->GetValue().Length() - 1);
@@ -286,13 +300,12 @@ void search_directory_tool_wxFrame::tryChangeDirectory()
             winApiController.checkForegroundWindow() &&
             winApiController.checkParentProcess())
     {
-        wxString path;
-        bool isDir;
+        PathesExchange::Path path("", false, false, PercentageType::Alias, "", "");
         int iPath = pathesController.getSelectedPath();
         if (iPath == -1)
             iPath = 0;
-        pathesController.getPath(iPath, path, isDir);
-        path = prepareDirFromPath(path, isDir);
+        path = pathesController.getPath(iPath);
+        path.fullPath = prepareDirFromPath(path.fullPath, path.isDir);
 
         Hide();
         winApiController.focusForegroundWindow();
@@ -303,14 +316,14 @@ void search_directory_tool_wxFrame::tryChangeDirectory()
         dirs.load_dirs();
         if (parsed.isOption("alias"))
         {
-            dirs.update_record_with_path_and_alias(path.ToStdWstring(), parsed.getOption("alias").ToStdWstring());
+            dirs.update_record_with_path_and_alias(path.fullPath.ToStdWstring(), parsed.getOption("alias").ToStdWstring());
         }
         dirs.set_variable(L"back", wxFileName::GetCwd().ToStdWstring());
         dirs.save_dirs();
         if (forceChangerType != TerminalChangerType::None)
-            changers[forceChangerType]->change_directory(path.ToStdWstring());
+            changers[forceChangerType]->change_directory(path.fullPath.ToStdWstring());
         else
-            changers[currentChangerType]->change_directory(path.ToStdWstring());
+            changers[currentChangerType]->change_directory(path.fullPath.ToStdWstring());
 
         Close();
     }
@@ -573,7 +586,7 @@ void search_directory_tool_wxFrame::OnTextCtrlCommandText(wxCommandEvent& event)
             wstring prev_path;
             if (dirs.get_variable(L"back", prev_path))
             {
-                pathesController.appendPath(prev_path, true);
+                pathesController.appendPath(PathesExchange::Path(prev_path, true, false, PercentageType::Absolute, "", ""));
             }
         }
         else
@@ -598,11 +611,11 @@ void search_directory_tool_wxFrame::OnTimer1Trigger(wxTimerEvent& event)
 
     int TIME_ON_OnTimer1Trigger = Timer1.GetInterval() / 2;
     clock_t st = clock();
-    PathesExchange::Path path("", false, false);
+    PathesExchange::Path path("", false, false, PercentageType::Alias, "", "");
 
     while (clock() - st < TIME_ON_OnTimer1Trigger && PathesExchange::popPath(path))
     {
-        pathesController.appendPath(path.fullPath, path.isDir);
+        pathesController.appendPath(path);
         if (pathesController.getPathesCount() == MAX_PATHES_COUNT)
         {
             exchangeVersion += 1;

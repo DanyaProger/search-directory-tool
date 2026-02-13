@@ -83,9 +83,12 @@ protected:
 
     FileTree fileTree;
 
+    wxString alias;
+    wxString basePath;
+
     virtual void onSuccessMatch(wxString& currentPath, bool isDir)
     {
-        PathesExchange::pushPath(version, PathesExchange::Path(currentPath, isDir, false));
+        PathesExchange::pushPath(version, PathesExchange::Path(currentPath, isDir, false, pType, alias, basePath));
     }
 
     virtual void onPercentageChanged(int percentage)
@@ -919,6 +922,9 @@ protected:
 
             currentDir = dir;
 
+            basePath = dir;
+            alias = sdToken.SubString(0, iFirstNotAliasChar - 1);
+
             preparedSdToken = sdToken.SubString(iFirstNotAliasChar, sdToken.Length() - 1);
 
             wregex re2(L"([\\\\/]\\.\\.)*(([\\\\/]|(\\*\\*)).*)?");
@@ -995,6 +1001,7 @@ protected:
             }
         }
         wxFileName trimmedDir = wxFileName::DirName(wxFileName::GetCwd());
+        basePath = wxFileName::GetCwd();
         if ((long long)(trimmedDir.GetDirCount()) + 1 > cnt)
         {
             while (cnt != 0)
@@ -1096,13 +1103,13 @@ public:
 class TerminalBfsSearcher : public BfsSearcher
 {
 private:
-    PathesExchange::Path result = PathesExchange::Path("", false, false);
+    PathesExchange::Path result = PathesExchange::Path("", false, false, PercentageType::Alias, "", "");
     bool foundResult = false;
 protected:
     void onSuccessMatch(wxString& currentPath, bool isDir) override
     {
         foundResult = true;
-        result = PathesExchange::Path(currentPath, isDir, false);
+        result = PathesExchange::Path(currentPath, isDir, false, pType, alias, basePath);
     }
 
     void onPercentageChanged(int percentage) override

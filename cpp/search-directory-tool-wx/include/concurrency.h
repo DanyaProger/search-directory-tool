@@ -68,9 +68,12 @@ public:
         wxString fullPath;
         bool isDir;
         bool isFromDirsTxt;
+        PercentageType type;
+        wxString alias;
+        wxString basePath;
 
-        Path(wxString fullPath, bool isDir, bool isFromDirsTxt)
-            :fullPath(fullPath), isDir(isDir), isFromDirsTxt(isFromDirsTxt)
+        Path(wxString fullPath, bool isDir, bool isFromDirsTxt, PercentageType type, wxString alias, wxString basePath)
+            :fullPath(fullPath), isDir(isDir), isFromDirsTxt(isFromDirsTxt), type(type), alias(alias), basePath(basePath)
         {
         }
     };

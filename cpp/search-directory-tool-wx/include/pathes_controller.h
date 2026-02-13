@@ -16,8 +16,7 @@ private:
     int selectedPath = -1;
     vector<long> rowStartPositions;
     vector<long> rowLengths;
-    vector<wxString> pathes;
-    vector<bool> isDirs;
+    vector<PathesExchange::Path> pathes;
     long length = 0;
 
     wxTextAttr defaultStyle;
@@ -65,44 +64,43 @@ public:
         fileStyle.SetFont(fileFont);
     }
 
-    void appendPath(wxString path, bool isDir)
+    void appendPath(PathesExchange::Path path)
     {
         if (!(rowLengths.size() == 1 && rowStartPositions.size() == 1 && rowStartPositions[0] == 0 && rowLengths[0] == 0))
         {
             textCtrl->AppendText("\n");
             length++;
         }
-        if (!isDir)
+        if (!path.isDir)
         {
-            size_t pos = path.Last('\\');
-            textCtrl->AppendText(path.SubString(0, pos));
+            size_t pos = path.fullPath.Last('\\');
+            textCtrl->AppendText(path.fullPath.SubString(0, pos));
             textCtrl->SetDefaultStyle(fileStyle);
-            textCtrl->AppendText(path.SubString(pos + 1, path.Length() - 1));
+            textCtrl->AppendText(path.fullPath.SubString(pos + 1, path.fullPath.Length() - 1));
             textCtrl->SetDefaultStyle(defaultStyle);
         }
         else
         {
-            size_t pos = path.Last('\\');
-            if (path.Length() > 0 && pos == path.Length() - 1)
-                pos = path.find_last_of('\\', pos - 1);
-            textCtrl->AppendText(path.SubString(0, pos));
+            size_t pos = path.fullPath.Last('\\');
+            if (path.fullPath.Length() > 0 && pos == path.fullPath.Length() - 1)
+                pos = path.fullPath.find_last_of('\\', pos - 1);
+            textCtrl->AppendText(path.fullPath.SubString(0, pos));
             textCtrl->SetDefaultStyle(dirStyle);
-            textCtrl->AppendText(path.SubString(pos + 1, path.Length() - 1));
+            textCtrl->AppendText(path.fullPath.SubString(pos + 1, path.fullPath.Length() - 1));
             textCtrl->SetDefaultStyle(defaultStyle);
         }
 
         if (!(rowLengths.size() == 1 && rowStartPositions.size() == 1 && rowStartPositions[0] == 0 && rowLengths[0] == 0))
         {
             rowStartPositions.push_back(length);
-            rowLengths.push_back(path.size());
+            rowLengths.push_back(path.fullPath.size());
         } else
         {
-            rowLengths.back() += path.size();
+            rowLengths.back() += path.fullPath.size();
         }
-        length += path.size();
+        length += path.fullPath.size();
 
         pathes.push_back(path);
-        isDirs.push_back(isDir);
     }
 
     int getNumberOfLines()
@@ -123,10 +121,9 @@ public:
             return rowLengths.size();
     }
 
-    void getPath(int index, wxString& path, bool& isDir)
+    PathesExchange::Path getPath(int index)
     {
-        path = pathes[index];
-        isDir = isDirs[index];
+        return pathes[index];
     }
 
     void pathSelectReset()
@@ -192,7 +189,6 @@ public:
         rowLengths.push_back(0);
 
         pathes.clear();
-        isDirs.clear();
     }
 };
 
