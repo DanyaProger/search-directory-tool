@@ -32,16 +32,27 @@ int wmain(int argc, wchar_t** argv)
 
     if (sdProcess != INVALID_HANDLE_VALUE)
     {
-        wchar_t Buffer[500];
-        if (GetModuleFileNameExW(sdProcess, 0, Buffer, 500))
+        int BufferSize = 500;
+        wchar_t* Buffer = new wchar_t[BufferSize];
+        while (true)
         {
-            wstring path(Buffer);
-            wstring process_name = filesystem::path(path).filename().wstring();
-            if (process_name == L"sd.exe")
-            {
-                WaitForSingleObject(sdProcess, 100000);
-            }
+            Buffer[BufferSize - 1] = !((wchar_t)NULL);
+            if (!GetModuleFileNameExW(sdProcess, 0, Buffer, BufferSize))
+                break;
+            if (Buffer[BufferSize - 1] != (wchar_t)NULL)
+                break;
+            delete[] Buffer;
+            BufferSize *= 2;
+            Buffer = new wchar_t[BufferSize];
         }
+        wstring path(Buffer);
+        wstring process_name = filesystem::path(path).filename().wstring();
+        if (process_name == L"sd.exe")
+        {
+            WaitForSingleObject(sdProcess, 100000);
+        }
+
+        delete[] Buffer;
         CloseHandle(sdProcess);
     }
 

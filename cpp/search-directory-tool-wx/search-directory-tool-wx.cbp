@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="search-directory-tool-wx" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="../bin/Debug/sd" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option projectLinkerOptionsRelation="2" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="$(#wx)/lib/gcc_lib/mswud" />
+					<Add directory="../RecordsDispatcher" />
+					<Add directory="../DirectoryChangers" />
+					<Add directory="../InputSimulator" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(#wx)/lib/gcc_lib/mswud" />
+				</ResourceCompiler>
+				<Linker>
+					<Add library="libwxmsw33ud.a" />
+					<Add library="libwxpngd.a" />
+					<Add library="libwxjpegd.a" />
+					<Add library="libwxtiffd.a" />
+					<Add library="libwxzlibd.a" />
+					<Add library="libwxregexud.a" />
+					<Add library="libwxscintillad.a" />
+					<Add library="libwxexpatd.a" />
+					<Add library="libwxlexillad.a" />
+					<Add library="libwxwebpd.a" />
+					<Add library="../RecordsDispatcher/bin/Debug/libRecordsDispatcher.a" />
+					<Add library="../DirectoryChangers/bin/Debug/libDirectoryChangers.a" />
+					<Add library="../InputSimulator/bin/Debug/libInputSimulator.a" />
+					<Add directory="$(#wx)/lib/gcc_lib" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="../bin/Release/sd" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option projectLinkerOptionsRelation="2" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add directory="$(#wx)/lib/gcc_lib/mswu" />
+					<Add directory="../RecordsDispatcher" />
+					<Add directory="../DirectoryChangers" />
+					<Add directory="../InputSimulator" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(#wx)/lib/gcc_lib/mswu" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="libwxmsw33u.a" />
+					<Add library="libwxpng.a" />
+					<Add library="libwxjpeg.a" />
+					<Add library="libwxtiff.a" />
+					<Add library="libwxzlib.a" />
+					<Add library="libwxregexu.a" />
+					<Add library="libwxscintilla.a" />
+					<Add library="libwxexpat.a" />
+					<Add library="libwxlexilla.a" />
+					<Add library="libwxwebp.a" />
+					<Add library="../RecordsDispatcher/bin/Release/libRecordsDispatcher.a" />
+					<Add library="../DirectoryChangers/bin/Release/libDirectoryChangers.a" />
+					<Add library="../InputSimulator/bin/Release/libInputSimulator.a" />
+					<Add directory="$(#wx)/lib/gcc_lib" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-std=gnu++17" />
+			<Add option="-pipe" />
+			<Add option="-mthreads" />
+			<Add option="-D__GNUWIN32__" />
+			<Add option="-D__WXMSW__" />
+			<Add option="-DwxUSE_UNICODE" />
+			<Add directory="$(#wx)/include" />
+		</Compiler>
+		<ResourceCompiler>
+			<Add directory="$(#wx)/include" />
+		</ResourceCompiler>
+		<Linker>
+			<Add option="-static-libstdc++" />
+			<Add option="-static-libgcc" />
+			<Add option="-static" />
+			<Add option="-mthreads" />
+			<Add library="libkernel32.a" />
+			<Add library="libuser32.a" />
+			<Add library="libgdi32.a" />
+			<Add library="libwinspool.a" />
+			<Add library="libcomdlg32.a" />
+			<Add library="libadvapi32.a" />
+			<Add library="libshell32.a" />
+			<Add library="libole32.a" />
+			<Add library="liboleaut32.a" />
+			<Add library="libuuid.a" />
+			<Add library="libcomctl32.a" />
+			<Add library="libwsock32.a" />
+			<Add library="libshlwapi.a" />
+			<Add library="libversion.a" />
+			<Add library="liboleacc.a" />
+			<Add library="libuxtheme.a" />
+			<Add library="libimm32.a" />
+			<Add library="libgdiplus.a" />
+			<Add library="libmsimg32.a" />
+		</Linker>
+		<Unit filename="include/cmdline.h" />
+		<Unit filename="include/concurrency.cpp" />
+		<Unit filename="include/concurrency.h" />
+		<Unit filename="include/pathes_controller.h" />
+		<Unit filename="include/percentage.h" />
+		<Unit filename="include/search.h" />
+		<Unit filename="include/search_tree.h" />
+		<Unit filename="include/types.h" />
+		<Unit filename="include/winapi_controller.h" />
+		<Unit filename="resource.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Unit filename="search_directory_tool_wxApp.cpp" />
+		<Unit filename="search_directory_tool_wxApp.h" />
+		<Unit filename="search_directory_tool_wxHelp.h" />
+		<Unit filename="search_directory_tool_wxMain.cpp" />
+		<Unit filename="search_directory_tool_wxMain.h" />
+		<Unit filename="search_directory_tool_wxParent.h" />
+		<Unit filename="wxsmith/search_directory_tool_wxframe.wxs" />
+		<Extensions>
+			<wxsmith version="1">
+				<gui name="wxWidgets" src="search_directory_tool_wxApp.cpp" main="search_directory_tool_wxFrame" init_handlers="necessary" language="CPP" />
+				<resources>
+					<wxFrame wxs="wxsmith/search_directory_tool_wxframe.wxs" src="search_directory_tool_wxMain.cpp" hdr="search_directory_tool_wxMain.h" fwddecl="0" i18n="1" name="search_directory_tool_wxFrame" language="CPP" />
+				</resources>
+			</wxsmith>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

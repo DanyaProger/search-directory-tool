@@ -10,6 +10,7 @@
 using namespace std;
 
 const wstring ALIAS_PLACEHOLDER = L"_no_alias_";
+const wstring VARIABLE_PREFIX = L"_var_";
 
 class DirectoryRecord
 {
@@ -52,13 +53,32 @@ public:
         for (size_t i = 0; i < directories.size(); i++)
         {
             filesystem::path current_path(directories[i].full_path);
-            if (filesystem::exists(updated_path) && filesystem::exists(current_path) && filesystem::equivalent(updated_path, current_path))
-                index = i;
+            if (directories[i].alias.rfind(VARIABLE_PREFIX, 0) != 0)
+            {
+                try
+                {
+                    if (filesystem::equivalent(updated_path, current_path))
+                        index = i;
+                }
+                catch (std::filesystem::filesystem_error const& ex)
+                {
+                    wstring path1 = path;
+                    wstring path2 = directories[i].full_path;
+                    transform(path1.begin(), path1.end(), path1.begin(), towlower);
+                    transform(path2.begin(), path2.end(), path2.begin(), towlower);
+                    if (path1.back() != '\\')
+                        path1.push_back('\\');
+                    if (path2.back() != '\\')
+                        path2.push_back('\\');
+                    if (path1 == path2)
+                        index = i;
+                }
+            }
         }
 
         for (size_t i = 0; i < directories.size(); i++)
         {
-            if (directories[i].alias != ALIAS_PLACEHOLDER && directories[i].alias == alias) {
+            if (directories[i].alias.rfind(VARIABLE_PREFIX, 0) != 0 && directories[i].alias != ALIAS_PLACEHOLDER && directories[i].alias == alias) {
                 directories[i].alias = ALIAS_PLACEHOLDER;
             }
         }
@@ -68,11 +88,12 @@ public:
             if (alias != ALIAS_PLACEHOLDER)
                 directories[index].alias = alias;
         } else {
-            directories.push_back(DirectoryRecord(path, alias));
+            if (alias.rfind(VARIABLE_PREFIX, 0) != 0)
+                directories.push_back(DirectoryRecord(path, alias));
         }
     }
 
-    wstring get_most_suitable_path(wstring token)
+    /*wstring get_most_suitable_path(wstring token)
     {
         int index = -1, max_count = 0;
         filesystem::path p(token);
@@ -109,6 +130,24 @@ public:
             return directories[index].full_path;
         }
         return L"";
+    }*/
+
+    bool get_path_with_alias(wstring alias, wstring& path)
+    {
+        int pos = -1;
+        for (size_t i = 0; i < directories.size(); i++)
+            if (directories[i].alias.rfind(VARIABLE_PREFIX, 0) != 0 && directories[i].alias == alias)
+                pos = i;
+        if (pos != -1)
+        {
+            path = directories[pos].full_path;
+            return true;
+        }
+        else
+        {
+            path = L"";
+            return false;
+        }
     }
 
     void remove_record_with_alias(wstring alias)
@@ -116,12 +155,50 @@ public:
         int pos = -1;
         for (size_t i = 0; i < directories.size(); i++)
         {
-            if (directories[i].alias == alias)
+            if (directories[i].alias.rfind(VARIABLE_PREFIX, 0) != 0 && directories[i].alias == alias)
                 pos = i;
         }
         if (pos != -1)
         {
             directories.erase(directories.begin() + pos);
+        }
+    }
+
+    void set_variable(wstring name, wstring value)
+    {
+        int index = -1;
+
+        for (size_t i = 0; i < directories.size(); i++)
+        {
+            if (directories[i].alias == VARIABLE_PREFIX + name) {
+                index = i;
+            }
+        }
+
+        if (index != -1) {
+            directories[index].full_path = value;
+        } else {
+            directories.push_back(DirectoryRecord(value, VARIABLE_PREFIX + name));
+        }
+    }
+
+    bool get_variable(wstring name, wstring& value)
+    {
+        int index = -1;
+
+        for (size_t i = 0; i < directories.size(); i++)
+        {
+            if (directories[i].alias == VARIABLE_PREFIX + name) {
+                index = i;
+            }
+        }
+
+        if (index != -1) {
+            value = directories[index].full_path;
+            return true;
+        } else {
+            value = L"";
+            return false;
         }
     }
 

@@ -1,0 +1,137 @@
+#ifndef SEARCH_DIRECTORY_TOOL_WXMAIN_H
+#define SEARCH_DIRECTORY_TOOL_WXMAIN_H
+
+//(*Headers(search_directory_tool_wxFrame)
+#include <wx/frame.h>
+#include <wx/sizer.h>
+#include <wx/statbmp.h>
+#include <wx/stattext.h>
+#include <wx/statusbr.h>
+#include <wx/textctrl.h>
+#include <wx/timer.h>
+//*)
+
+#include <regex>
+#include <windows.h>
+#include <map>
+
+#include <wx/filename.h>
+#include <wx/msgdlg.h>
+#include <wx/stdpaths.h>
+#include <wx/valtext.h>
+
+#include "search_directory_tool_wxHelp.h"
+#include "search_directory_tool_wxParent.h"
+#include "include/concurrency.h"
+#include "include/cmdline.h"
+#include "include/search.h"
+#include "include/pathes_controller.h"
+#include "include/winapi_controller.h"
+#include "RecordsDispatcher.h"
+#include "DirectoryChangers.h"
+
+class search_directory_tool_wxFrame: public wxFrame, public wxThreadHelper
+{
+    public:
+
+        search_directory_tool_wxFrame(wxWindow* parent,wxWindowID id = -1);
+        virtual ~search_directory_tool_wxFrame();
+
+    private:
+
+        //(*Handlers(search_directory_tool_wxFrame)
+        void OnQuit(wxCommandEvent& event);
+        void OnAbout(wxCommandEvent& event);
+        void OnButton1Click(wxCommandEvent& event);
+        void OnKeyDown(wxKeyEvent& event);
+        void OnCommandKeyDown(wxKeyEvent& event);
+        void OnPathesKeyDown(wxKeyEvent& event);
+        void OnChar(wxKeyEvent& event);
+        void OnCommandLeftDown(wxMouseEvent& event);
+        void OnPathesLeftDown(wxMouseEvent& event);
+        void OnPathesLeftUp(wxMouseEvent& event);
+        void OnLeftDown(wxMouseEvent& event);
+        void OnTextCtrlCommandText(wxCommandEvent& event);
+        void OnClose(wxCloseEvent& event);
+        void OnThreadUpdate(wxThreadEvent& event);
+        void OnPathesEnter(wxCommandEvent& event);
+        void OnTimer1Trigger(wxTimerEvent& event);
+        //*)
+
+        wxThread::ExitCode Entry();
+        void setPercentage(pair<PercentageType, int> percentage);
+        void selectPathWithMouse();
+        void tryComplete();
+        void tryChangeDirectory();
+        bool doOperations();
+        void chooseBitmap(TerminalChangerType changer);
+
+        //(*Identifiers(search_directory_tool_wxFrame)
+        static const wxWindowID ID_STATICTEXTSD;
+        static const wxWindowID ID_TEXTCTRLCOMMAND;
+        static const wxWindowID ID_PARENTICONBITMAP;
+        static const wxWindowID ID_STATICTEXTPLACEHOLDER1;
+        static const wxWindowID ID_STATICTEXTPATHESLABEL;
+        static const wxWindowID ID_TEXTCTRLPATHES;
+        static const wxWindowID ID_TIMER1;
+        static const wxWindowID ID_STATUSBAR1;
+        //*)
+
+        //(*Declarations(search_directory_tool_wxFrame)
+        wxStaticBitmap* ParentIconBitmap;
+        wxStaticText* StaticTextPathesLabel;
+        wxStaticText* StaticTextPlaceholder1;
+        wxStaticText* StaticTextSd;
+        wxStatusBar* StatusBar1;
+        wxTextCtrl* TextCtrlCommand;
+        wxTextCtrl* TextCtrlPathes;
+        wxTimer Timer1;
+        //*)
+
+        HelpDialog* helpDialogRu = NULL;
+        HelpDialog* helpDialogEn = NULL;
+        ParentDialog* parentDialog = NULL;
+
+        long long exchangeVersion = -1;
+        long MAX_PATHES_COUNT = 147;
+        wxString exePath = wxStandardPaths::Get().GetExecutablePath();
+        CmdLineParser cmdLineParser = CmdLineParser({CmdLineFlag(false, "", true, "path"),
+                                     CmdLineFlag(false, "", true, "remove-path"),
+                                     CmdLineFlag(false, "", true, "fill-dirs.txt"),
+                                     CmdLineFlag(false, "", true, "parent"),
+                                     CmdLineFlag(true, "b", true, "bash"),
+                                     CmdLineFlag(true, "c", true, "cmd"),
+                                     CmdLineFlag(true, "e", true, "explorer"),
+                                     CmdLineFlag(true, "f", true, "far"),
+                                     CmdLineFlag(true, "p", true, "powershell"),
+                                     CmdLineFlag(true, "t", true, "totalcmd"),
+                                     CmdLineFlag(false, "", true, "help"),
+                                     CmdLineFlag(false, "", true, "help-en"),
+                                     CmdLineFlag(false, "", true, "back")},
+                                    {CmdLineOption(false, "", true, "alias"),
+                                     CmdLineOption(false, "", true, "time")});
+        CmdLineArgs parsed;
+        int aliasPercentage, relativePercentage, absolutePercentage;
+
+        PathesController pathesController;
+        WinApiController winApiController;
+
+        TerminalChangerType currentChangerType;
+        TerminalChangerType forceChangerType = TerminalChangerType::None;
+        TerminalChangerType choosenBitmap;
+        map<TerminalChangerType, wxBitmap> bitmaps;
+
+        map<TerminalChangerType, TerminalDirectoryChanger*> changers;
+        BashDirectoryChanger bashChanger = BashDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
+        CmdDirectoryChanger cmdChanger = CmdDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
+        ExplorerDirectoryChanger explorerChanger = ExplorerDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring(), true);
+        FarDirectoryChanger farChanger = FarDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
+        PowerShellDirectoryChanger powershellChanger = PowerShellDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
+        TotalCommanderDirectoryChanger totalCommanderChanger = TotalCommanderDirectoryChanger(wxStandardPaths::Get().GetExecutablePath().ToStdWstring());
+
+    public:
+
+        DECLARE_EVENT_TABLE()
+};
+
+#endif // SEARCH_DIRECTORY_TOOL_WXMAIN_H
