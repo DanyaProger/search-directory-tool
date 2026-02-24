@@ -61,7 +61,7 @@ View "program setup" and "program uninstall" sections in help (`sd --help-en`)
     ```
  2) Create global variable `wx` in settings of Codeblocks;
  3) open file `cpp\sd-workspace.workspace`;
- 4) activate `search-directory-tool` project;
+ 4) activate `search-directory-tool-wx` project;
  5) choose `Release` target;
  6) run `build`;
  7) go to `cpp\bin\Release` directory and run `sd --path`.
